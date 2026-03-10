@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { partidosService } from '../services/partidosService';
 import { type Partido } from '../models/partido';
 
-export function TimesPage() {
+export function PartidosPage() {
   const [partido, setPartidos] = useState<Partido[]>([]);
 
   useEffect(() => {
