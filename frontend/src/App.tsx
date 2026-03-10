@@ -2,6 +2,7 @@ import { useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
+import { EstadosPage } from './pages/estadosPage';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -20,6 +21,7 @@ function App() {
         <h1 className="text-4xl font-bold text-blue-600">
           Projeto Integrador 🚀
         </h1>
+        <EstadosPage></EstadosPage>
       </div>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
