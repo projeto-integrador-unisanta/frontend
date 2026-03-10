@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { estadosService } from '../services/estadosService';
 import { type Estado } from '../models/estado';
 
-export function EstadosPage() {
+export function CardEstado() {
   const [estados, setEstados] = useState<Estado[]>([]);
 
   useEffect(() => {

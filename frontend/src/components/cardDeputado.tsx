@@ -4,7 +4,7 @@ interface Props {
   Deputado: Deputado;
 }
 
-export function PessoaCard({ Deputado }: Props) {
+export function CardDeputado({ Deputado }: Props) {
   return (
     <div
       style={{
