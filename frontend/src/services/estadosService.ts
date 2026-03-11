@@ -1,9 +1,9 @@
-import { api } from './api';
-import { type Estado } from '../models/estado';
+// import { api } from './api';
+// import { type Estado } from '../models/estado';
 
-export const estadosService = {
-  async listarEstados(): Promise<Estado[]> {
-    const response = await api.get('/estados');
-    return response.data;
-  },
-};
+// export const estadosService = {
+//   async listarEstados(): Promise<Estado[]> {
+//     const response = await api.get('/estados');
+//     return response.data;
+//   },
+// };
