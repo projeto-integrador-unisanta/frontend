@@ -4,7 +4,7 @@ import { AppRoutes } from '../src/routes/AppRoutes';
 export default function App() {
   return (
     <BrowserRouter>
-      <main className="flex w-full min-h-screen bg-gray-100">
+      <main className="">
         <AppRoutes />
       </main>
     </BrowserRouter>

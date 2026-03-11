@@ -6,48 +6,40 @@ interface Props {
 
 export function CardDeputado({ Deputado }: Props) {
   return (
-    <div
-      style={{
-        border: '1px solid #ccc',
-        padding: '16px',
-        borderRadius: '8px',
-        width: '300px',
-      }}
-    >
+    <div className="border border-solid border-gray-300 p-4 rounded-lg w-50 shadow-sm hover:shadow-md transition-shadow">
       {Deputado.fotoUrl && (
         <img
           src={Deputado.fotoUrl}
-          alt={Deputado.nomeCompleto ?? 'foto'}
-          style={{ width: '100%', borderRadius: '8px' }}
+          alt={Deputado.nomeUrna ?? 'foto'}
+          className="w-full rounded-md aspect-[3/4] object-cover"
         />
       )}
 
-      <h2>{Deputado.nomeCompleto ?? 'Nome não informado'}</h2>
+      {/* Nome menor (text-lg) e com margem superior */}
+      <h2
+        className="text-lg font-bold mt-2 mb-1 truncate"
+        title={Deputado.nomeUrna}
+      >
+        {Deputado.nomeUrna ?? 'Nome não informado'}
+      </h2>
 
-      <p>
-        <strong>Cargo:</strong> {Deputado.cargo ?? 'Não informado'}
-      </p>
+      {/* Textos menores (text-sm) para caber no card reduzido */}
+      <div className="text-sm text-gray-700 space-y-1">
+        <p>
+          <strong className="font-semibold">Estado:</strong>{' '}
+          {Deputado.estado ?? '-'}
+        </p>
 
-      <p>
-        <strong>Email:</strong> {Deputado.email ?? 'Não informado'}
-      </p>
+        <p>
+          <strong className="font-semibold">Partido:</strong>{' '}
+          {Deputado.partido ?? '-'}
+        </p>
 
-      <p>
-        <strong>Estado ID:</strong> {Deputado.estadoId ?? '-'}
-      </p>
-
-      <p>
-        <strong>Partido ID:</strong> {Deputado.partidoId ?? '-'}
-      </p>
-
-      <p>
-        <strong>Ativo:</strong>{' '}
-        {Deputado.ativo === null
-          ? 'Não informado'
-          : Deputado.ativo
-            ? 'Sim'
-            : 'Não'}
-      </p>
+        <p className="truncate" title={Deputado.email}>
+          <strong className="font-semibold">Email:</strong>{' '}
+          {Deputado.email ?? 'N/A'}
+        </p>
+      </div>
     </div>
   );
 }
