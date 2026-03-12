@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CardDeputado } from '../components/cardDeputado';
 // Importação dos hooks personalizados para busca de dados
 import { useDeputados as useDeputadosEstado } from '../hooks/useDeputadosEstado';
@@ -7,6 +8,7 @@ import { useEstados } from '../hooks/useEstados';
 import { usePartidos } from '../hooks/usePartidos';
 
 export function PoliticosPage() {
+  const navigate = useNavigate();
   // Estados locais para controlar os valores dos filtros e busca
   const [busca, setBusca] = useState('');
   const [estado, setEstado] = useState('Todos');
@@ -88,6 +90,16 @@ export function PoliticosPage() {
 
       {/* COLUNA 2 - CONTEÚDO PRINCIPAL */}
       <main className="p-10 flex flex-col">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold mb-6 transition-colors w-fit"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Voltar para Início
+        </button>
+
         <h1 className="text-3xl font-bold mb-6">Busca de Políticos</h1>
 
         {/* Campo de busca por nome (filtro local em tempo real) */}

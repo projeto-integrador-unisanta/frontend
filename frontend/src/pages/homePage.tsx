@@ -15,7 +15,7 @@ export function HomePage() {
               <path d="M4 22V10M20 22V10M2 10L12 2L22 10M12 22V15M9 22V15M15 22V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-wider">PORTAL DOS DEPUTADOS</span>
+          <span className="font-bold text-lg tracking-wider">PORTAL DOS POLITICOS</span>
         </div>
 
         {/* MENU DE NAVEGAÇÃO */}
@@ -50,16 +50,24 @@ export function HomePage() {
       {/* 3. SEÇÃO HERO (PRINCIPAL) */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 -mt-20">
         <h1 className="text-4xl md:text-6xl font-extrabold text-center max-w-4xl mb-12 tracking-tight leading-tight">
-          ACOMPANHE O TRABALHO<br />DE SEUS DEPUTADOS
+          ACOMPANHE O TRABALHO<br />DE SEUS POLITICOS
         </h1>
 
-        {/* BOTÃO DE ACESSO */}
-        <button
-          onClick={() => navigate('/politicos')}
-          className="bg-[#FFBF00] hover:bg-[#E6AC00] text-black font-black px-20 py-5 rounded-lg transition-all uppercase tracking-[0.2em] text-xl shadow-2xl shadow-blue-900/40 transform hover:scale-105 active:scale-95"
-        >
-          IR
-        </button>
+        {/* BOTÕES DE ACESSO */}
+        <div className="flex flex-col md:flex-row gap-6">
+          <button
+            onClick={() => navigate('/politicos')}
+            className="bg-[#FFBF00] hover:bg-[#E6AC00] text-black font-black px-12 py-5 rounded-lg transition-all uppercase tracking-[0.2em] text-xl shadow-2xl shadow-blue-900/40 transform hover:scale-105 active:scale-95"
+          >
+            POLÍTICOS
+          </button>
+          <button
+            onClick={() => navigate('/pecs')}
+            className="bg-white hover:bg-gray-200 text-[#002B5B] font-black px-12 py-5 rounded-lg transition-all uppercase tracking-[0.2em] text-xl shadow-2xl shadow-blue-900/40 transform hover:scale-105 active:scale-95"
+          >
+            PECS
+          </button>
+        </div>
 
         {/* Indicador visual inferior */}
         <div className="mt-20 text-white/40 text-xs font-medium tracking-widest uppercase flex flex-col items-center gap-4">
