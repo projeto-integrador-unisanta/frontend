@@ -62,6 +62,7 @@ export function PecPage() {
           data: dataOriginal,
           votosSim: [],
           votosNao: [],
+          votosAbstencao: [],
           votosOutros: []
         };
       }
@@ -77,6 +78,8 @@ export function PecPage() {
         grupos[id].votosSim.push(deputadoInfo);
       } else if (item.voto === 'Não') {
         grupos[id].votosNao.push(deputadoInfo);
+      } else if (item.voto === 'Abstenção') {
+        grupos[id].votosAbstencao.push(deputadoInfo);
       } else {
         grupos[id].votosOutros.push(deputadoInfo);
       }
@@ -85,13 +88,17 @@ export function PecPage() {
     // Calcula os resumos dinâmicos por sessão conforme solicitado
     const sessoesProcessadas = Object.values(grupos).map((sessao: any) => {
       const totalSim = sessao.votosSim.length;
-      const totalNao = sessao.votosNao.length + sessao.votosOutros.length;
+      const totalNao = sessao.votosNao.length;
+      const totalAbs = sessao.votosAbstencao.length;
+      const totalOutros = sessao.votosOutros.length;
+      
       return {
         ...sessao,
         resumo: {
           sim: totalSim,
           nao: totalNao,
-          total: totalSim + totalNao
+          abs: totalAbs,
+          total: totalSim + totalNao + totalAbs + totalOutros
         }
       };
     });
@@ -108,8 +115,9 @@ export function PecPage() {
     return sessoesAgrupadas.reduce((acc, sessao) => ({
       sim: acc.sim + sessao.resumo.sim,
       nao: acc.nao + sessao.resumo.nao,
+      abs: acc.abs + sessao.resumo.abs,
       total: acc.total + sessao.resumo.total
-    }), { sim: 0, nao: 0, total: 0 });
+    }), { sim: 0, nao: 0, abs: 0, total: 0 });
   }, [sessoesAgrupadas]);
 
   const handleAbrirVotos = (pec: PEC) => {
@@ -217,11 +225,16 @@ export function PecPage() {
               </h2>
 
               {/* Resumo de Votos logo abaixo do cabeçalho */}
-              {votos && (
+              {/* {votos && (
                 <div className="flex items-center gap-6 bg-blue-50 p-4 rounded-xl border border-blue-100 w-fit">
                   <div className="text-center">
                     <div className="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Total de Votos</div>
                     <div className="text-xl font-black text-blue-900">{votos.total_votos_historicos}</div>
+                    {resumoPrincipal && (
+                      <div className="text-[10px] text-blue-400 font-bold mt-1">
+                        ({resumoPrincipal.sim + resumoPrincipal.nao} Sim+Não)
+                      </div>
+                    )}
                   </div>
                   {resumoPrincipal && (
                     <>
@@ -234,10 +247,14 @@ export function PecPage() {
                         <div className="text-[10px] text-red-600 font-bold uppercase tracking-wider">Não</div>
                         <div className="text-xl font-black text-red-600">{resumoPrincipal.nao}</div>
                       </div>
+                      <div className="text-center">
+                        <div className="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Abstenção</div>
+                        <div className="text-xl font-black text-orange-600">{resumoPrincipal.abs}</div>
+                      </div>
                     </>
                   )}
                 </div>
-              )}
+              )} */}
             </div>
 
             <div className="border-t border-gray-100 pt-6 flex-1 overflow-hidden flex flex-col">
@@ -245,7 +262,7 @@ export function PecPage() {
                 <h3 className="text-lg font-semibold text-gray-800">Sessões de Votação</h3>
                 {votos && (
                   <span className="text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                    {votos.status} - {votos.total_votos_historicos} votações totais
+                    {votos.status} {/* - {votos.total_votos_historicos} votações totais */}
                   </span>
                 )}
               </div>
@@ -283,7 +300,7 @@ export function PecPage() {
                           </h4>
                         </div>
 
-                        <div className="flex items-center gap-4 flex-shrink-0 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        {/* <div className="flex items-center gap-4 flex-shrink-0 bg-gray-50 p-3 rounded-lg border border-100">
                           <div className="text-center">
                             <div className="text-[10px] text-gray-400 font-bold uppercase">Total</div>
                             <div className="text-sm font-bold text-gray-700">{sessao.resumo.total}</div>
@@ -297,6 +314,18 @@ export function PecPage() {
                             <div className="text-[10px] text-red-600 font-bold uppercase">Não</div>
                             <div className="text-sm font-bold text-red-600">{sessao.resumo.nao}</div>
                           </div>
+                          <div className="text-center">
+                            <div className="text-[10px] text-orange-600 font-bold uppercase">Abst.</div>
+                            <div className="text-sm font-bold text-orange-600">{sessao.resumo.abs}</div>
+                          </div>
+                          <svg 
+                            className={`w-5 h-5 text-gray-400 transition-transform ${sessaoAberta === sessao.id ? 'rotate-180' : ''}`} 
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div> */}
+                        <div className="flex items-center gap-4 flex-shrink-0">
                           <svg 
                             className={`w-5 h-5 text-gray-400 transition-transform ${sessaoAberta === sessao.id ? 'rotate-180' : ''}`} 
                             fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -314,7 +343,7 @@ export function PecPage() {
                             <div>
                               <h5 className="text-xs font-bold text-green-600 uppercase mb-3 tracking-wider flex items-center gap-2">
                                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                A Favor ({sessao.votosSim.length})
+                                A Favor {/* ({sessao.votosSim.length}) */}
                               </h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {sessao.votosSim.map((dep: any, i: number) => (
@@ -337,7 +366,7 @@ export function PecPage() {
                             <div>
                               <h5 className="text-xs font-bold text-red-600 uppercase mb-3 tracking-wider flex items-center gap-2">
                                 <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                                Contra ({sessao.votosNao.length})
+                                Contra {/* ({sessao.votosNao.length}) */}
                               </h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {sessao.votosNao.map((dep: any, i: number) => (
@@ -360,7 +389,7 @@ export function PecPage() {
                             <div>
                               <h5 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider flex items-center gap-2">
                                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                                Outros ({sessao.votosOutros.length})
+                                Outros {/* ({sessao.votosOutros.length}) */}
                               </h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {sessao.votosOutros.map((dep: any, i: number) => (
