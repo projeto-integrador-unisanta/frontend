@@ -7,4 +7,5 @@ export interface PEC {
   ementa: string;
   temaPrincipal: string | null;
   urlInteiroTeor: string;
+  nome_popular: string | null;
 }
