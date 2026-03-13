@@ -6,14 +6,27 @@ import { useNavigate } from 'react-router-dom';
 export function PecPage() {
   const { pecs, loading, error } = usePecs();
   const [busca, setBusca] = useState('');
+  const [ano, setAno] = useState('');
   const navigate = useNavigate();
 
+  const anos = useMemo(() => {
+    const uniqueYears = [...new Set(pecs.map((pec) => pec.ano))];
+    return uniqueYears.sort((a, b) => b - a);
+  }, [pecs]);
+
   const pecsFiltradas = useMemo(() => {
-    return pecs.filter((pec) =>
-      pec.ementa.toLowerCase().includes(busca.toLowerCase()) ||
-      pec.numero.toString().includes(busca)
-    );
-  }, [pecs, busca]);
+    const buscaLower = busca.toLowerCase();
+    return pecs.filter((pec) => {
+      const identificacao = `${pec.siglaTipo} ${pec.numero}/${pec.ano}`.toLowerCase();
+      const matchBusca =
+        pec.ementa.toLowerCase().includes(buscaLower) ||
+        pec.numero.toString().includes(buscaLower) ||
+        pec.siglaTipo.toLowerCase().includes(buscaLower) ||
+        identificacao.includes(buscaLower);
+      const matchAno = ano === '' || pec.ano.toString() === ano;
+      return matchBusca && matchAno;
+    });
+  }, [pecs, busca, ano]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
@@ -30,12 +43,26 @@ export function PecPage() {
 
         <h1 className="text-3xl font-bold mb-6">Busca de PECs</h1>
 
-        <input
-          placeholder="Buscar por número ou assunto da PEC..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="w-full mb-6 border rounded-xl p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <input
+            placeholder="Buscar por número ou assunto da PEC..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="flex-1 border rounded-xl p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          <select
+            value={ano}
+            onChange={(e) => setAno(e.target.value)}
+            className="md:w-48 border rounded-xl p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+          >
+            <option value="">Todos os anos</option>
+            {anos.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <p className="text-gray-600 mb-6">
           {pecsFiltradas.length} PECs encontradas
