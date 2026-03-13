@@ -9,7 +9,7 @@ export function CardPec({ pec, onClick }: Props) {
   return (
     <div
       onClick={() => onClick?.(pec)}
-      className="border border-solid border-gray-300 p-6 rounded-lg w-full shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col justify-between cursor-pointer"
+      className="border border-solid border-gray-300 p-6 rounded-lg  shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col justify-between cursor-pointer"
     >
       <div>
         <div className="flex justify-between items-start mb-4">
