@@ -1,17 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { deputadosService } from '../services/deputadosService';
-import { type Deputado } from '../models/deputado';
+import type { DeputadoPagina } from '../models/deputadoPagina';
 
 export function useDeputados() {
-  const [deputados, setDeputados] = useState<Deputado[]>([]);
+  const [dadosApi, setDadosApi] = useState<DeputadoPagina | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function carregarDeputados() {
       try {
+        setLoading(true);
         const data = await deputadosService.listarDeputados();
-        setDeputados(data);
+        setDadosApi(data);
       } catch (err) {
         setError('Erro ao carregar deputados');
         console.error(err);
@@ -23,8 +24,14 @@ export function useDeputados() {
     carregarDeputados();
   }, []);
 
+  // Extraímos o array para que a Page não precise saber a estrutura do objeto da API
+  const deputados = useMemo(() => {
+    return dadosApi?.deputados || [];
+  }, [dadosApi]);
+
   return {
-    deputados,
+    deputados, // Retorna apenas o array bruto
+    deputadosPagina: dadosApi, // Retorna o objeto completo caso precise de metadados
     loading,
     error,
   };

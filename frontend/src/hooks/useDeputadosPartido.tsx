@@ -2,12 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { deputadosPartidoService } from '../services/deputadosPartidoService';
 import { type Deputado } from '../models/deputado';
 
-export function useDeputados(
+export function useDeputadosPartido(
   siglaPartido: string,
   uf: string,
   buscaNome: string,
 ) {
-  const [deputados, setDeputados] = useState<Deputado[]>([]);
+  // Mantemos como 'any' ou uma interface de resposta para aceitar o objeto da API
+  const [dadosApi, setDadosApi] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +20,7 @@ export function useDeputados(
         setError(null);
         const dados =
           await deputadosPartidoService.listarDeputadosPorPartido(siglaPartido);
-        setDeputados(dados);
+        setDadosApi(dados);
       } catch (err) {
         setError('Não foi possível carregar os deputados.');
         console.error(err);
@@ -29,23 +30,30 @@ export function useDeputados(
     }
 
     carregarDados();
-  }, [siglaPartido]); // Só dispara o fetch se o partido mudar
+  }, [siglaPartido]);
 
-  // 2. Filtro Combinado Local (Performance otimizada com useMemo)
+  // 2. Extraímos a lista base (Array) do objeto da API
+  const listaBase = useMemo(() => {
+    // Se dadosApi já for um array, usa ele. Se for objeto, busca a propriedade .deputados
+    if (Array.isArray(dadosApi)) return dadosApi;
+    return dadosApi?.deputados || [];
+  }, [dadosApi]);
+
+  // 3. Filtro Combinado Local
   const deputadosFiltrados = useMemo(() => {
-    return deputados.filter((dep) => {
-      const matchNome = dep.nomeUrna
-        .toLowerCase()
-        .includes(buscaNome.toLowerCase());
+    return listaBase.filter((dep: Deputado) => {
+      const matchNome =
+        dep.nomeUrna?.toLowerCase().includes(buscaNome.toLowerCase()) ?? false;
+
       const matchUF = uf === 'Todos' || dep.estado === uf;
 
       return matchNome && matchUF;
     });
-  }, [deputados, uf, buscaNome]); // Recalcula se a lista original, UF ou Nome mudarem
+  }, [listaBase, uf, buscaNome]);
 
   return {
     deputados: deputadosFiltrados,
-    totalOriginal: deputados.length,
+    totalOriginal: listaBase.length, // Agora acessível e seguro
     loading,
     error,
   };

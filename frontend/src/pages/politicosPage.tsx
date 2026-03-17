@@ -1,51 +1,52 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CardDeputado } from '../components/cardDeputado';
-// Importação dos hooks personalizados para busca de dados
-import { useDeputados as useDeputadosEstado } from '../hooks/useDeputadosEstado';
-import { useDeputados as useDeputadosPartido } from '../hooks/useDeputadosPartido';
+
+// Importação dos hooks
+import { useDeputadosEstado } from '../hooks/useDeputadosEstado';
+import { useDeputadosPartido } from '../hooks/useDeputadosPartido';
 import { useEstados } from '../hooks/useEstados';
 import { usePartidos } from '../hooks/usePartidos';
+import { useDeputados } from '../hooks/useDeputados'; // Hook para "Todos"
 
 export function PoliticosPage() {
   const navigate = useNavigate();
-  // Estados locais para controlar os valores dos filtros e busca
+
+  // Estados dos filtros
   const [busca, setBusca] = useState('');
   const [estado, setEstado] = useState('Todos');
   const [partido, setPartido] = useState('Todos');
 
-  // Carrega as listas de Estados e Partidos para preencher os selects dos filtros
+  // Listas para os Selects
   const { estados } = useEstados();
   const { partidos } = usePartidos();
 
-  /**
-   * Lógica de Busca Híbrida:
-   * 1. useDeputadosEstado: Busca políticos por Estado na API e filtra Partido/Nome localmente.
-   * 2. useDeputadosPartido: Busca políticos por Partido na API e filtra Estado/Nome localmente.
-   * Chamamos ambos para que o React gerencie o ciclo de vida, mas escolheremos qual usar abaixo.
-   */
+  // Instanciamos os hooks.
+  // O React gerencia qual useEffect disparar com base nas dependências internas deles.
+  const hookGeral = useDeputados();
   const hookEstado = useDeputadosEstado(estado, partido, busca);
   const hookPartido = useDeputadosPartido(partido, estado, busca);
 
   /**
-   * Decidimos qual fonte de dados usar com base na interação do usuário:
-   * - Se o usuário selecionou um Estado específico, priorizamos a busca por Estado na API.
-   * - Se o Estado for 'Todos' mas um Partido foi selecionado, usamos a busca por Partido na API.
-   * - O filtro de 'busca' (nome) é sempre aplicado localmente dentro dos hooks.
+   * LÓGICA DE SELEÇÃO DE FONTE:
+   * Escolhemos qual objeto de hook retornar.
    */
-  const { deputados, loading } = useMemo(() => {
+  const fonteAtiva = useMemo(() => {
     if (estado !== 'Todos') return hookEstado;
     if (partido !== 'Todos') return hookPartido;
-    return hookEstado; // Caso padrão (busca todos)
-  }, [estado, partido, hookEstado, hookPartido]);
+    return hookGeral;
+  }, [estado, partido, hookEstado, hookPartido, hookGeral]);
+
+  // DESESTRUTURAÇÃO: Agora pegamos os dados da fonte selecionada
+  const { deputados, loading, error } = fonteAtiva;
 
   return (
     <div className="grid grid-cols-[280px_1fr] min-h-screen bg-gray-100">
-      {/* COLUNA 1 - BARRA LATERAL DE FILTROS */}
+      {/* BARRA LATERAL */}
       <aside className="bg-white border-r p-6 space-y-6">
         <h2 className="text-xl font-semibold">Filtros</h2>
 
-        {/* Filtro de Partido */}
+        {/* Select Partido */}
         <div className="space-y-2">
           <label className="text-sm text-gray-600">Partido</label>
           <select
@@ -56,13 +57,13 @@ export function PoliticosPage() {
             <option value="Todos">Todos</option>
             {partidos.map((p) => (
               <option key={p.id} value={p.sigla}>
-                {p.sigla} - {p.nome}
+                {p.sigla}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Filtro de Estado */}
+        {/* Select Estado */}
         <div className="space-y-2">
           <label className="text-sm text-gray-600">Estado</label>
           <select
@@ -78,62 +79,63 @@ export function PoliticosPage() {
             ))}
           </select>
         </div>
-
-        {/* Filtro de Cargo (Desabilitado pois atualmente só temos Deputados) */}
-        <div className="space-y-2">
-          <label className="text-sm text-gray-600">Cargo</label>
-          <select className="w-full border rounded-lg p-2" disabled>
-            <option>Deputado Federal</option>
-          </select>
-        </div>
       </aside>
 
-      {/* COLUNA 2 - CONTEÚDO PRINCIPAL */}
+      {/* CONTEÚDO PRINCIPAL */}
       <main className="p-10 flex flex-col">
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold mb-6 transition-colors w-fit"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Voltar para Início
         </button>
 
         <h1 className="text-3xl font-bold mb-6">Busca de Políticos</h1>
 
-        {/* Campo de busca por nome (filtro local em tempo real) */}
         <input
-          placeholder="Buscar por nome do político..."
+          placeholder="Buscar por nome..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           className="w-full mb-6 border rounded-xl p-3"
         />
 
-        <p className="text-gray-600 mb-6">
-          {deputados.length} políticos encontrados
-        </p>
+        {/* Status de carregamento e contagem */}
+        {!loading && (
+          <p className="text-gray-600 mb-6">
+            {deputados.length} políticos encontrados para{' '}
+            {estado === 'Todos' ? 'Brasil' : estado}
+          </p>
+        )}
 
-        {/* Listagem de Cards ou Estado de Carregamento */}
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-xl font-medium text-gray-500">Carregando...</p>
-          </div>
+          <div className="flex justify-center py-20">Carregando...</div>
+        ) : error ? (
+          <div className="text-red-500">{error}</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-            {deputados.map((dep) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {deputados.map((dep: any) => (
               <CardDeputado key={dep.id} Deputado={dep} />
             ))}
           </div>
         )}
 
-        {/* Mensagem de "Não encontrado" */}
         {!loading && deputados.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">
-              Nenhum político encontrado com esses filtros.
-            </p>
-          </div>
+          <p className="text-center text-gray-500 py-20">
+            Nenhum resultado para os filtros aplicados.
+          </p>
         )}
       </main>
     </div>
