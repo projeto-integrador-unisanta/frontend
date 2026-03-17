@@ -1,5 +1,6 @@
 export interface pecDeputados {
+  id: string;
   pec: string;
-  voto: boolean;
+  voto: string;
   data: string;
 }

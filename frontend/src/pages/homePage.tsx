@@ -11,17 +11,40 @@ export function HomePage() {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
             {/* Ícone de prédio governamental estilizado (SVG) */}
-            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-[#002B5B]">
-              <path d="M4 22V10M20 22V10M2 10L12 2L22 10M12 22V15M9 22V15M15 22V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="w-6 h-6 text-[#002B5B]"
+            >
+              <path
+                d="M4 22V10M20 22V10M2 10L12 2L22 10M12 22V15M9 22V15M15 22V15"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-wider">PORTAL DOS POLITICOS</span>
+          <span className="font-bold text-lg tracking-wider">
+            PORTAL DOS DEPUTADOS
+          </span>
         </div>
 
         {/* MENU DE NAVEGAÇÃO */}
         <nav className="hidden md:flex gap-8 font-medium text-sm">
-          {['INÍCIO', 'DEPUTADOS', 'PROPOSTAS', 'NOTÍCIAS', 'TRANSPARÊNCIA', 'OUVIDORIA'].map((item) => (
-            <a key={item} href="#" className="hover:text-amber-400 transition-colors uppercase tracking-tight">
+          {[
+            'INÍCIO',
+            'DEPUTADOS',
+            'PROPOSTAS',
+            'NOTÍCIAS',
+            'TRANSPARÊNCIA',
+            'OUVIDORIA',
+          ].map((item) => (
+            <a
+              key={item}
+              href="#"
+              className="hover:text-amber-400 transition-colors uppercase tracking-tight"
+            >
               {item}
             </a>
           ))}
@@ -30,13 +53,31 @@ export function HomePage() {
         {/* AÇÕES À DIREITA */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 cursor-pointer hover:text-amber-400 transition-colors">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className="text-xs font-semibold uppercase">Acesso Restrito</span>
+            <span className="text-xs font-semibold uppercase">
+              Acesso Restrito
+            </span>
           </div>
-          <svg className="w-5 h-5 cursor-pointer hover:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="w-5 h-5 cursor-pointer hover:text-amber-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
           {/* Bandeira do Brasil estilizada */}
           <div className="flex flex-col gap-0.5 w-6">
@@ -50,7 +91,9 @@ export function HomePage() {
       {/* 3. SEÇÃO HERO (PRINCIPAL) */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 -mt-20">
         <h1 className="text-4xl md:text-6xl font-extrabold text-center max-w-4xl mb-12 tracking-tight leading-tight">
-          ACOMPANHE O TRABALHO<br />DE SEUS POLITICOS
+          ACOMPANHE O TRABALHO
+          <br />
+          DE SEUS DEPUTADOS
         </h1>
 
         {/* BOTÕES DE ACESSO */}
@@ -59,7 +102,7 @@ export function HomePage() {
             onClick={() => navigate('/politicos')}
             className="bg-[#FFBF00] hover:bg-[#E6AC00] text-black font-black px-12 py-5 rounded-lg transition-all uppercase tracking-[0.2em] text-xl shadow-2xl shadow-blue-900/40 transform hover:scale-105 active:scale-95"
           >
-            POLÍTICOS
+            DEPUTADOS
           </button>
           <button
             onClick={() => navigate('/pecs')}
