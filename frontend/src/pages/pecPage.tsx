@@ -4,6 +4,7 @@ import { CardPec } from '../components/cardPec';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type PEC } from '../models/pec';
+import { Header } from '../components/Header';
 
 export function PecPage() {
   const { pecs, loading, error } = usePecs();
@@ -137,18 +138,9 @@ export function PecPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-10">
-      <main className="max-w-6xl mx-auto flex flex-col">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold mb-6 transition-colors w-fit"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Voltar para Início
-        </button>
-
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <Header />
+      <main className="max-w-6xl mx-auto flex flex-col p-10 flex-1">
         <h1 className="text-3xl font-bold mb-6">Busca de PECs</h1>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -223,38 +215,6 @@ export function PecPage() {
                   ? `${pecSelecionada.nome_popular} (${pecSelecionada.numero}/${pecSelecionada.ano})` 
                   : `Proposta de Emenda à Constituição ${pecSelecionada.numero}/${pecSelecionada.ano}`}
               </h2>
-
-              {/* Resumo de Votos logo abaixo do cabeçalho */}
-              {/* {votos && (
-                <div className="flex items-center gap-6 bg-blue-50 p-4 rounded-xl border border-blue-100 w-fit">
-                  <div className="text-center">
-                    <div className="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Total de Votos</div>
-                    <div className="text-xl font-black text-blue-900">{votos.total_votos_historicos}</div>
-                    {resumoPrincipal && (
-                      <div className="text-[10px] text-blue-400 font-bold mt-1">
-                        ({resumoPrincipal.sim + resumoPrincipal.nao} Sim+Não)
-                      </div>
-                    )}
-                  </div>
-                  {resumoPrincipal && (
-                    <>
-                      <div className="h-10 w-px bg-blue-200"></div>
-                      <div className="text-center">
-                        <div className="text-[10px] text-green-600 font-bold uppercase tracking-wider">Sim</div>
-                        <div className="text-xl font-black text-green-600">{resumoPrincipal.sim}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-[10px] text-red-600 font-bold uppercase tracking-wider">Não</div>
-                        <div className="text-xl font-black text-red-600">{resumoPrincipal.nao}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Abstenção</div>
-                        <div className="text-xl font-black text-orange-600">{resumoPrincipal.abs}</div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )} */}
             </div>
 
             <div className="border-t border-gray-100 pt-6 flex-1 overflow-hidden flex flex-col">
@@ -262,7 +222,7 @@ export function PecPage() {
                 <h3 className="text-lg font-semibold text-gray-800">Sessões de Votação</h3>
                 {votos && (
                   <span className="text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                    {votos.status} {/* - {votos.total_votos_historicos} votações totais */}
+                    {votos.status}
                   </span>
                 )}
               </div>
@@ -283,7 +243,6 @@ export function PecPage() {
                 <div className="space-y-4 overflow-y-auto pr-2 flex-1 custom-scrollbar">
                   {sessoesAgrupadas.map((sessao: any) => (
                     <div key={sessao.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                      {/* Cabeçalho da Sessão (Resumo) */}
                       <button 
                         onClick={() => toggleSessao(sessao.id)}
                         className="w-full text-left p-5 hover:bg-gray-50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
@@ -299,32 +258,6 @@ export function PecPage() {
                             {sessao.descricao}
                           </h4>
                         </div>
-
-                        {/* <div className="flex items-center gap-4 flex-shrink-0 bg-gray-50 p-3 rounded-lg border border-100">
-                          <div className="text-center">
-                            <div className="text-[10px] text-gray-400 font-bold uppercase">Total</div>
-                            <div className="text-sm font-bold text-gray-700">{sessao.resumo.total}</div>
-                          </div>
-                          <div className="h-8 w-px bg-gray-200"></div>
-                          <div className="text-center">
-                            <div className="text-[10px] text-green-600 font-bold uppercase">Sim</div>
-                            <div className="text-sm font-bold text-green-600">{sessao.resumo.sim}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-[10px] text-red-600 font-bold uppercase">Não</div>
-                            <div className="text-sm font-bold text-red-600">{sessao.resumo.nao}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-[10px] text-orange-600 font-bold uppercase">Abst.</div>
-                            <div className="text-sm font-bold text-orange-600">{sessao.resumo.abs}</div>
-                          </div>
-                          <svg 
-                            className={`w-5 h-5 text-gray-400 transition-transform ${sessaoAberta === sessao.id ? 'rotate-180' : ''}`} 
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div> */}
                         <div className="flex items-center gap-4 flex-shrink-0">
                           <svg 
                             className={`w-5 h-5 text-gray-400 transition-transform ${sessaoAberta === sessao.id ? 'rotate-180' : ''}`} 
@@ -335,15 +268,13 @@ export function PecPage() {
                         </div>
                       </button>
 
-                      {/* Lista de Deputados (Expansível) */}
                       {sessaoAberta === sessao.id && (
                         <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-6">
-                          {/* A Favor */}
                           {sessao.votosSim.length > 0 && (
                             <div>
                               <h5 className="text-xs font-bold text-green-600 uppercase mb-3 tracking-wider flex items-center gap-2">
                                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                A Favor {/* ({sessao.votosSim.length}) */}
+                                A Favor
                               </h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {sessao.votosSim.map((dep: any, i: number) => (
@@ -361,12 +292,11 @@ export function PecPage() {
                             </div>
                           )}
 
-                          {/* Contra */}
                           {sessao.votosNao.length > 0 && (
                             <div>
                               <h5 className="text-xs font-bold text-red-600 uppercase mb-3 tracking-wider flex items-center gap-2">
                                 <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                                Contra {/* ({sessao.votosNao.length}) */}
+                                Contra
                               </h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {sessao.votosNao.map((dep: any, i: number) => (
@@ -384,12 +314,11 @@ export function PecPage() {
                             </div>
                           )}
 
-                          {/* Outros (Abstenção, Obstrução, etc) */}
                           {sessao.votosOutros.length > 0 && (
                             <div>
                               <h5 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider flex items-center gap-2">
                                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                                Outros {/* ({sessao.votosOutros.length}) */}
+                                Outros
                               </h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {sessao.votosOutros.map((dep: any, i: number) => (
