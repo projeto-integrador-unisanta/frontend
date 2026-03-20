@@ -23,6 +23,7 @@ export function PecPage() {
   // Estados para o Modal de Votos
   const [pecSelecionada, setPecSelecionada] = useState<PEC | null>(null);
   const [sessaoAberta, setSessaoAberta] = useState<string | null>(null);
+  const [buscaPolitico, setBuscaPolitico] = useState('');
 
   const anos = useMemo(() => {
     const uniqueYears = [...new Set(pecs.map((pec) => pec.ano))];
@@ -130,6 +131,7 @@ export function PecPage() {
   const handleFecharModal = () => {
     setPecSelecionada(null);
     setSessaoAberta(null);
+    setBuscaPolitico('');
     limparVotos();
   };
 
@@ -218,13 +220,31 @@ export function PecPage() {
             </div>
 
             <div className="border-t border-gray-100 pt-6 flex-1 overflow-hidden flex flex-col">
-              <div className="flex justify-between items-center mb-4 flex-shrink-0">
-                <h3 className="text-lg font-semibold text-gray-800">Sessões de Votação</h3>
-                {votos && (
-                  <span className="text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                    {votos.status}
-                  </span>
-                )}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 flex-shrink-0">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-lg font-semibold text-gray-800">Sessões de Votação</h3>
+                  {votos && (
+                    <span className="text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                      {votos.status}
+                    </span>
+                  )}
+                </div>
+
+                <div className="relative flex-1 max-w-xs">
+                  <input
+                    type="text"
+                    placeholder="Pesquisar político na sessão..."
+                    value={buscaPolitico}
+                    onChange={(e) => setBuscaPolitico(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+                  />
+                  <svg 
+                    className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" 
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
               </div>
               
               {loadingVotos ? (
@@ -270,71 +290,96 @@ export function PecPage() {
 
                       {sessaoAberta === sessao.id && (
                         <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-6">
-                          {sessao.votosSim.length > 0 && (
-                            <div>
-                              <h5 className="text-xs font-bold text-green-600 uppercase mb-3 tracking-wider flex items-center gap-2">
-                                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                A Favor
-                              </h5>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {sessao.votosSim.map((dep: any, i: number) => (
-                                  <div key={i} className="bg-white p-3 rounded-lg border border-green-100 flex items-center justify-between shadow-sm">
-                                    <div>
-                                      <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
-                                      <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
-                                    </div>
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-green-100 text-green-700">
-                                      Sim
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          {(() => {
+                            const filtrar = (lista: any[]) => 
+                              lista.filter(d => d.nome.toLowerCase().includes(buscaPolitico.toLowerCase()));
+                            
+                            const simFiltrados = filtrar(sessao.votosSim);
+                            const naoFiltrados = filtrar(sessao.votosNao);
+                            const outrosFiltrados = filtrar(sessao.votosOutros);
+                            const totalEncontrados = simFiltrados.length + naoFiltrados.length + outrosFiltrados.length;
 
-                          {sessao.votosNao.length > 0 && (
-                            <div>
-                              <h5 className="text-xs font-bold text-red-600 uppercase mb-3 tracking-wider flex items-center gap-2">
-                                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                                Contra
-                              </h5>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {sessao.votosNao.map((dep: any, i: number) => (
-                                  <div key={i} className="bg-white p-3 rounded-lg border border-red-100 flex items-center justify-between shadow-sm">
-                                    <div>
-                                      <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
-                                      <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
-                                    </div>
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-red-100 text-red-700">
-                                      Não
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                            if (buscaPolitico && totalEncontrados === 0) {
+                              return (
+                                <div className="text-center py-4 text-gray-500 text-sm italic">
+                                  Nenhum político encontrado com "{buscaPolitico}" nesta sessão.
+                                </div>
+                              );
+                            }
 
-                          {sessao.votosOutros.length > 0 && (
-                            <div>
-                              <h5 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider flex items-center gap-2">
-                                <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                                Outros
-                              </h5>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {sessao.votosOutros.map((dep: any, i: number) => (
-                                  <div key={i} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm">
-                                    <div>
-                                      <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
-                                      <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                            return (
+                              <>
+                                {/* A Favor */}
+                                {simFiltrados.length > 0 && (
+                                  <div>
+                                    <h5 className="text-xs font-bold text-green-600 uppercase mb-3 tracking-wider flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                      A Favor ({simFiltrados.length})
+                                    </h5>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {simFiltrados.map((dep: any, i: number) => (
+                                        <div key={i} className="bg-white p-3 rounded-lg border border-green-100 flex items-center justify-between shadow-sm">
+                                          <div>
+                                            <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                                          </div>
+                                          <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-green-100 text-green-700">
+                                            Sim
+                                          </span>
+                                        </div>
+                                      ))}
                                     </div>
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-gray-100 text-gray-700">
-                                      {dep.voto}
-                                    </span>
                                   </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                                )}
+
+                                {/* Contra */}
+                                {naoFiltrados.length > 0 && (
+                                  <div>
+                                    <h5 className="text-xs font-bold text-red-600 uppercase mb-3 tracking-wider flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                      Contra ({naoFiltrados.length})
+                                    </h5>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {naoFiltrados.map((dep: any, i: number) => (
+                                        <div key={i} className="bg-white p-3 rounded-lg border border-red-100 flex items-center justify-between shadow-sm">
+                                          <div>
+                                            <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                                          </div>
+                                          <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-red-100 text-red-700">
+                                            Não
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Outros (Abstenção, Obstrução, etc) */}
+                                {outrosFiltrados.length > 0 && (
+                                  <div>
+                                    <h5 className="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                                      Outros ({outrosFiltrados.length})
+                                    </h5>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {outrosFiltrados.map((dep: any, i: number) => (
+                                        <div key={i} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm">
+                                          <div>
+                                            <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                                          </div>
+                                          <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-gray-100 text-gray-700">
+                                            {dep.voto}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>

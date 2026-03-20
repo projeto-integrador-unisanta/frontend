@@ -148,12 +148,44 @@ export function PoliticosPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* MAPEAMOS OS EXIBIDOS (SLICE) E NÃO TODOS */}
                 {deputadosExibidos.map((dep: any) => (
                   <CardDeputado key={dep.id} Deputado={dep} />
                 ))}
               </div>
+
+              {/* CONTROLES DE PAGINAÇÃO (INFERIOR) */}
+              {deputados.length > 0 && (
+                <div className="flex items-center justify-between bg-white p-4 rounded-xl mt-8 shadow-sm border border-gray-200">
+                  <span className="text-sm text-gray-500">
+                    Página <strong>{paginaAtual}</strong> de{' '}
+                    <strong>{totalPaginas}</strong> ({deputados.length} resultados)
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={paginaAtual === 1}
+                      onClick={() => {
+                        setPaginaAtual((p) => p - 1);
+                        window.scrollTo(0, 0);
+                      }}
+                      className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-30 transition-all"
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      disabled={paginaAtual >= totalPaginas}
+                      onClick={() => {
+                        setPaginaAtual((p) => p + 1);
+                        window.scrollTo(0, 0);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-30 transition-all"
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {deputados.length === 0 && (
                 <p className="text-center text-gray-500 py-20">
