@@ -31,10 +31,13 @@ export function FitPage() {
   const [resultados, setResultados] = useState<PoliticoFit[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // ATUALIZAÇÃO 1: Novos estados para controlar a paginação
+  // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const ITENS_POR_PAGINA = 12;
+
+  // NOVO ESTADO: Controla qual político está com o Modal aberto
+  const [politicoSelecionado, setPoliticoSelecionado] = useState<PoliticoFit | null>(null);
 
   useEffect(() => {
     async function fetchTags() {
@@ -55,13 +58,11 @@ export function FitPage() {
     );
   };
 
-  // ATUALIZAÇÃO 2: Agora a função recebe qual página deve buscar
   const calcularFit = async (pageNumber = 1) => {
     if (selectedTags.length === 0) return;
 
     setLoading(true);
     try {
-      // Passa a página via Query String na URL
       const res = await fetch(`https://backend-de23aa.fly.dev/fit?page=${pageNumber}&limit=${ITENS_POR_PAGINA}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,8 +72,6 @@ export function FitPage() {
       
       setResultados(data.deputados || []);
       setCurrentPage(data.pagina_atual || 1);
-      
-      // Se a API retornou a quantidade máxima do limite, presumimos que tem mais páginas
       setHasMore((data.resultados_nesta_pagina || 0) === ITENS_POR_PAGINA);
     } catch (error) {
       console.error('Erro ao calcular fit:', error);
@@ -81,11 +80,10 @@ export function FitPage() {
     }
   };
 
-  // Funções dos botões da paginação
   const handleNextPage = () => {
     if (hasMore) {
       calcularFit(currentPage + 1);
-      window.scrollTo({ top: 400, behavior: 'smooth' }); // Rola a tela pra cima
+      window.scrollTo({ top: 400, behavior: 'smooth' });
     }
   };
 
@@ -96,13 +94,21 @@ export function FitPage() {
     }
   };
 
-  // Ao clicar no botão principal, sempre reseta pra página 1
   const handleCalcularNovo = () => {
     calcularFit(1);
   };
 
+  // Função para fechar o modal se o usuário apertar ESC
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPoliticoSelecionado(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#002B5B] text-white py-10 px-4">
+    <div className="min-h-screen bg-[#002B5B] text-white py-10 px-4 relative">
       <div className="max-w-6xl mx-auto">
         
         {/* BOTÃO DE VOLTAR */}
@@ -155,7 +161,7 @@ export function FitPage() {
           </div>
 
           <button
-            onClick={handleCalcularNovo} // Chama a função que zera pra pag 1
+            onClick={handleCalcularNovo}
             disabled={loading || selectedTags.length === 0}
             className="mt-8 w-full md:w-auto px-10 py-4 bg-yellow-400 text-[#002B5B] font-extrabold rounded-xl hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed uppercase tracking-wide"
           >
@@ -172,13 +178,13 @@ export function FitPage() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {resultados.map((politico, index) => {
-                // ATUALIZAÇÃO 3: Cálculo da Posição Global no Ranking (Ex: Pág 2 começa no #13)
                 const posicaoGlobal = (currentPage - 1) * ITENS_POR_PAGINA + index + 1;
 
                 return (
                   <div
                     key={politico.idApi}
-                    className="border border-white/10 bg-[#001b3d] p-5 rounded-2xl shadow-lg hover:border-white/30 transition-all flex flex-col group"
+                    onClick={() => setPoliticoSelecionado(politico)} // ABRE O MODAL AQUI
+                    className="border border-white/10 bg-[#001b3d] p-5 rounded-2xl shadow-lg hover:border-yellow-400/50 hover:shadow-[0_0_20px_rgba(250,204,21,0.15)] transition-all flex flex-col group cursor-pointer"
                   >
                     {/* Ranking e Score */}
                     <div className="flex justify-between items-center mb-4">
@@ -186,7 +192,7 @@ export function FitPage() {
                         #{posicaoGlobal}
                       </span>
                       <span className="bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-sm font-bold px-3 py-1 rounded-md flex items-center gap-1">
-                        🔥 {politico.scoreFit} match{politico.scoreFit > 1 ? 'es' : ''}
+                        🔥 {politico.scoreFit}
                       </span>
                     </div>
 
@@ -207,40 +213,23 @@ export function FitPage() {
                     <h3 className="text-xl font-bold truncate mb-2 text-white" title={politico.nome}>
                       {politico.nome}
                     </h3>
-                    <div className="text-sm text-white/70 space-y-1">
+                    <div className="text-sm text-white/70 space-y-1 mb-4">
                       <p><strong className="text-white">Estado:</strong> {politico.estado}</p>
                       <p><strong className="text-white">Partido:</strong> {politico.partido}</p>
                     </div>
 
-                    {/* JUSTIFICATIVAS */}
-                    {politico.justificativas && politico.justificativas.length > 0 && (
-                      <details className="mt-4 border-t border-white/10 pt-3 group/details">
-                        <summary className="text-sm font-bold text-yellow-400 cursor-pointer hover:text-white transition-colors list-none flex items-center gap-2">
-                          <svg className="w-4 h-4 transition-transform group-open/details:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                          Ver pautas em comum
-                        </summary>
-                        
-                        <div className="mt-3 max-h-40 overflow-y-auto pr-2 space-y-3 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                          {politico.justificativas.map((just, idx) => (
-                            <div key={idx} className="bg-white/5 rounded-lg p-2.5">
-                              <span className="block text-xs font-bold text-yellow-200 mb-1 uppercase tracking-wider">{just.pec}</span>
-                              <p className="text-[11px] text-white/70 leading-relaxed line-clamp-3" title={just.ementa}>
-                                {just.ementa}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </details>
-                    )}
-
+                    {/* Botão Fake pra indicar clique */}
+                    <div className="mt-auto pt-4 border-t border-white/10 text-center">
+                      <span className="text-sm font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                        Ver Justificativa →
+                      </span>
+                    </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* ATUALIZAÇÃO 4: Botões de Paginação */}
+            {/* Paginação */}
             <div className="mt-12 flex items-center justify-center gap-6">
               <button
                 onClick={handlePrevPage}
@@ -265,6 +254,73 @@ export function FitPage() {
           </div>
         )}
       </div>
+
+      {/* ========================================== */}
+      {/* MODAL DE JUSTIFICATIVA                       */}
+      {/* ========================================== */}
+      {politicoSelecionado && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"
+          onClick={() => setPoliticoSelecionado(null)} // Clicar fora fecha o modal
+        >
+          <div 
+            className="bg-[#001b3d] border border-white/20 p-6 md:p-8 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()} // Impede que o clique dentro do modal feche ele
+          >
+            {/* Botão Fechar (X) */}
+            <button 
+              onClick={() => setPoliticoSelecionado(null)}
+              className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Cabeçalho do Modal */}
+            <div className="flex items-center gap-4 mb-6 border-b border-white/10 pb-6">
+              {politicoSelecionado.foto ? (
+                <img src={politicoSelecionado.foto} alt="foto" className="w-20 h-20 rounded-full object-cover border-2 border-yellow-400" />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-yellow-400 flex items-center justify-center">Sem foto</div>
+              )}
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">{politicoSelecionado.nome}</h2>
+                <p className="text-white/70">
+                  {politicoSelecionado.partido} - {politicoSelecionado.estado}
+                </p>
+                <span className="inline-block mt-2 bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 text-xs font-bold px-2 py-1 rounded">
+                  🔥 Match em {politicoSelecionado.scoreFit} pautas
+                </span>
+              </div>
+            </div>
+
+            {/* Conteúdo com Scroll (Justificativas) */}
+            <h3 className="text-lg font-bold text-yellow-400 mb-4 uppercase tracking-wider">
+              Pautas Votadas em Comum:
+            </h3>
+            
+            <div className="overflow-y-auto pr-2 flex-1 space-y-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+              {politicoSelecionado.justificativas?.length > 0 ? (
+                politicoSelecionado.justificativas.map((just, idx) => (
+                  <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <span className="block text-sm font-bold text-yellow-300 mb-2 uppercase">
+                      {just.pec}
+                    </span>
+                    <p className="text-sm text-white/80 leading-relaxed font-light">
+                      {just.ementa}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-white/50 italic">Nenhuma justificativa detalhada encontrada.</p>
+              )}
+            </div>
+            
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
