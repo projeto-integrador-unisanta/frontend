@@ -7,6 +7,7 @@ export function Header() {
     { label: 'INÍCIO', path: '/' },
     { label: 'POLÍTICOS', path: '/politicos' },
     { label: 'PECS', path: '/pecs' },
+    {label: 'MatchEleitoral', path: '/fit'}
   ];
 
   return (
