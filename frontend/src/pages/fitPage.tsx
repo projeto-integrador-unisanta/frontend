@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
+// ... (rest of imports if any, but let's keep it simple)
 
 // Tipagens
+// ... (rest of types)
 interface Tag {
   id: string;
   label: string;
@@ -28,6 +31,7 @@ export function FitPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [resultados, setResultados] = useState<PoliticoFit[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -291,14 +295,21 @@ export function FitPage() {
             <div className="overflow-y-auto pr-2 flex-1 space-y-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
               {politicoSelecionado.justificativas?.length > 0 ? (
                 politicoSelecionado.justificativas.map((just, idx) => (
-                  <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                    <span className="block text-sm font-bold text-yellow-600 mb-2 uppercase">
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setPoliticoSelecionado(null);
+                      navigate(`/pecs?busca=${encodeURIComponent(just.pec)}`);
+                    }}
+                    className="w-full text-left p-4 rounded-xl border border-gray-100 hover:border-yellow-200 hover:bg-yellow-50/50 transition-all group"
+                  >
+                    <span className="block text-sm font-black text-gray-400 uppercase group-hover:text-yellow-600 transition-colors mb-2">
                       {just.pec}
                     </span>
-                    <p className="text-sm text-gray-700 leading-relaxed">
+                    <p className="text-sm text-gray-600 leading-snug">
                       {just.ementa}
                     </p>
-                  </div>
+                  </button>
                 ))
               ) : (
                 <p className="text-gray-400 italic">Nenhuma justificativa detalhada encontrada.</p>

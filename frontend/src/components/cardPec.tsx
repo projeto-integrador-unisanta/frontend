@@ -7,66 +7,63 @@ interface Props {
 
 export function CardPec({ pec, onClick }: Props) {
   return (
-    <div
+    <button
       onClick={() => onClick?.(pec)}
-      className="border border-solid border-gray-300 p-6 rounded-lg  shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col justify-between cursor-pointer"
+      className="w-full text-left bg-white border border-gray-100 p-6 rounded-2xl hover:border-blue-200 hover:shadow-md transition-all group flex flex-col h-full relative"
     >
-      <div>
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex gap-2">
-            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded uppercase">
-              {pec.siglaTipo} {pec.numero}/{pec.ano}
-            </span>
-            {pec.nome_popular && (
-              <span className="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                {pec.nome_popular}
-              </span>
-            )}
-          </div>
-          {pec.temaPrincipal && (
-            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-              {pec.temaPrincipal}
-            </span>
+      <div className="flex justify-between items-start mb-4 w-full">
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block">
+            {pec.siglaTipo} {pec.numero}/{pec.ano}
+          </span>
+          {pec.nome_popular && (
+            <h2 className="text-lg font-black text-gray-900 uppercase leading-tight group-hover:text-blue-600 transition-colors">
+              {pec.nome_popular}
+            </h2>
           )}
         </div>
-
-        <h2 className="text-lg font-bold mb-3 text-gray-900 leading-tight">
-          {pec.nome_popular 
-            ? `${pec.nome_popular} (${pec.numero}/${pec.ano})` 
-            : `Proposta de Emenda à Constituição ${pec.numero}/${pec.ano}`}
-        </h2>
-
-        <p className="text-sm text-gray-700 mb-4 line-clamp-4 italic" title={pec.ementa}>
-          "{pec.ementa}"
-        </p>
+        {pec.temaPrincipal && (
+          <span className="text-[9px] font-bold px-2 py-1 bg-gray-50 text-gray-500 rounded-md uppercase tracking-tighter">
+            {pec.temaPrincipal}
+          </span>
+        )}
       </div>
 
-      <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
-        <a
-          href={pec.urlInteiroTeor}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1 transition-colors"
+      <h2 className={`text-sm font-bold text-gray-900 mb-3 leading-tight ${pec.nome_popular ? 'hidden' : 'block'}`}>
+        Proposta de Emenda à Constituição {pec.numero}/{pec.ano}
+      </h2>
+
+      <p className="text-xs text-gray-500 line-clamp-4 leading-relaxed italic mb-6 flex-1 pr-2">
+        "{pec.ementa}"
+      </p>
+
+      <div className="pt-4 border-t border-gray-50 flex justify-between items-center w-full mt-auto">
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            Clique para ver votos
+          </span>
+          {pec.urlInteiroTeor && (
+            <a
+              href={pec.urlInteiroTeor}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[9px] font-black text-blue-400 hover:text-blue-600 uppercase tracking-widest flex items-center gap-1 transition-colors"
+            >
+              Íntegra
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          )}
+        </div>
+        <svg 
+          className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" 
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
-          Ver Texto na Íntegra
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-            />
-          </svg>
-        </a>
-        <span className="text-gray-400 text-xs">Clique para ver votos</span>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+        </svg>
       </div>
-    </div>
+    </button>
   );
 }

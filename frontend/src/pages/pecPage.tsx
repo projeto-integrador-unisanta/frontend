@@ -1,13 +1,17 @@
 import { usePecs } from '../hooks/usePecs';
 import { usePecVotos } from '../hooks/usePecVotos';
+import { useDeputados } from '../hooks/useDeputados';
 import { CardPec } from '../components/cardPec';
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { DeputadoModal } from '../components/DeputadoModal';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { type PEC } from '../models/pec';
+import { type Deputado } from '../models/deputado';
 import { Header } from '../components/Header';
 
 export function PecPage() {
   const { pecs, loading, error } = usePecs();
+  const { deputados } = useDeputados('');
   const { 
     votos, 
     loading: loadingVotos, 
@@ -16,6 +20,7 @@ export function PecPage() {
     limparVotos 
   } = usePecVotos();
 
+  const [searchParams] = useSearchParams();
   const [busca, setBusca] = useState('');
   const [ano, setAno] = useState('');
   const navigate = useNavigate();
@@ -24,6 +29,44 @@ export function PecPage() {
   const [pecSelecionada, setPecSelecionada] = useState<PEC | null>(null);
   const [sessaoAberta, setSessaoAberta] = useState<string | null>(null);
   const [buscaPolitico, setBuscaPolitico] = useState('');
+
+  // Estado para o Modal do Político
+  const [politicoSelecionado, setPoliticoSelecionado] = useState<Deputado | null>(null);
+  const [isPoliticoModalOpen, setIsPoliticoModalOpen] = useState(false);
+
+  const handleAbrirVotos = (pec: PEC) => {
+    setPecSelecionada(pec);
+    setSessaoAberta(null);
+    carregarVotos(pec.numero, pec.ano);
+  };
+
+  const handleAbrirPolitico = (nome: string) => {
+    const deputado = deputados.find(d => d.nomeUrna.toLowerCase() === nome.toLowerCase());
+    if (deputado) {
+      setPoliticoSelecionado(deputado);
+      setIsPoliticoModalOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const buscaParam = searchParams.get('busca');
+    if (buscaParam) {
+      setBusca(buscaParam);
+      
+      // Se as PECs já foram carregadas, tenta encontrar a correspondência exata para abrir o modal
+      if (pecs.length > 0) {
+        const pecEncontrada = pecs.find(pec => {
+          const identificacao = `${pec.siglaTipo} ${pec.numero}/${pec.ano}`.toLowerCase();
+          return identificacao === buscaParam.toLowerCase() || 
+                 (pec.nome_popular && pec.nome_popular.toLowerCase() === buscaParam.toLowerCase());
+        });
+        
+        if (pecEncontrada) {
+          handleAbrirVotos(pecEncontrada);
+        }
+      }
+    }
+  }, [searchParams, pecs]);
 
   const anos = useMemo(() => {
     const uniqueYears = [...new Set(pecs.map((pec) => pec.ano))];
@@ -121,12 +164,6 @@ export function PecPage() {
       total: acc.total + sessao.resumo.total
     }), { sim: 0, nao: 0, abs: 0, total: 0 });
   }, [sessoesAgrupadas]);
-
-  const handleAbrirVotos = (pec: PEC) => {
-    setPecSelecionada(pec);
-    setSessaoAberta(null);
-    carregarVotos(pec.numero, pec.ano);
-  };
 
   const handleFecharModal = () => {
     setPecSelecionada(null);
@@ -318,15 +355,19 @@ export function PecPage() {
                                     </h5>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                       {simFiltrados.map((dep: any, i: number) => (
-                                        <div key={i} className="bg-white p-3 rounded-lg border border-green-100 flex items-center justify-between shadow-sm">
+                                        <button 
+                                          key={i}
+                                          onClick={() => handleAbrirPolitico(dep.nome)}
+                                          className="bg-white p-3 rounded-xl border border-green-50 hover:border-green-200 hover:bg-green-50/30 transition-all flex items-center justify-between shadow-sm group text-left"
+                                        >
                                           <div>
-                                            <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
-                                            <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                                            <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{dep.nome}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase font-medium">{dep.partido} - {dep.estado}</div>
                                           </div>
-                                          <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-green-100 text-green-700">
+                                          <span className="text-[10px] font-black px-2 py-1 rounded-lg uppercase bg-green-100 text-green-700">
                                             Sim
                                           </span>
-                                        </div>
+                                        </button>
                                       ))}
                                     </div>
                                   </div>
@@ -341,15 +382,19 @@ export function PecPage() {
                                     </h5>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                       {naoFiltrados.map((dep: any, i: number) => (
-                                        <div key={i} className="bg-white p-3 rounded-lg border border-red-100 flex items-center justify-between shadow-sm">
+                                        <button 
+                                          key={i}
+                                          onClick={() => handleAbrirPolitico(dep.nome)}
+                                          className="bg-white p-3 rounded-xl border border-red-50 hover:border-red-200 hover:bg-red-50/30 transition-all flex items-center justify-between shadow-sm group text-left"
+                                        >
                                           <div>
-                                            <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
-                                            <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                                            <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{dep.nome}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase font-medium">{dep.partido} - {dep.estado}</div>
                                           </div>
-                                          <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-red-100 text-red-700">
+                                          <span className="text-[10px] font-black px-2 py-1 rounded-lg uppercase bg-red-100 text-red-700">
                                             Não
                                           </span>
-                                        </div>
+                                        </button>
                                       ))}
                                     </div>
                                   </div>
@@ -364,15 +409,19 @@ export function PecPage() {
                                     </h5>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                       {outrosFiltrados.map((dep: any, i: number) => (
-                                        <div key={i} className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between shadow-sm">
+                                        <button 
+                                          key={i}
+                                          onClick={() => handleAbrirPolitico(dep.nome)}
+                                          className="bg-white p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all flex items-center justify-between shadow-sm group text-left"
+                                        >
                                           <div>
-                                            <div className="text-sm font-bold text-gray-900">{dep.nome}</div>
-                                            <div className="text-[10px] text-gray-500 uppercase">{dep.partido} - {dep.estado}</div>
+                                            <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{dep.nome}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase font-medium">{dep.partido} - {dep.estado}</div>
                                           </div>
-                                          <span className="text-[10px] font-bold px-2 py-1 rounded uppercase bg-gray-100 text-gray-700">
+                                          <span className="text-[10px] font-black px-2 py-1 rounded-lg uppercase bg-gray-100 text-gray-700">
                                             {dep.voto}
                                           </span>
-                                        </div>
+                                        </button>
                                       ))}
                                     </div>
                                   </div>
@@ -403,6 +452,15 @@ export function PecPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Modal do Político */}
+      {politicoSelecionado && (
+        <DeputadoModal 
+          politico={politicoSelecionado}
+          isOpen={isPoliticoModalOpen}
+          onClose={() => setIsPoliticoModalOpen(false)}
+        />
       )}
     </div>
   );

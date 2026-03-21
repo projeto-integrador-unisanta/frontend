@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type Deputado } from '../models/deputado';
 
 interface DeputadoModalProps {
@@ -9,6 +10,7 @@ interface DeputadoModalProps {
 
 export function DeputadoModal({ politico, isOpen, onClose }: DeputadoModalProps) {
   const [buscaVoto, setBuscaVoto] = useState('');
+  const navigate = useNavigate();
   
   if (!isOpen) return null;
 
@@ -16,6 +18,11 @@ export function DeputadoModal({ politico, isOpen, onClose }: DeputadoModalProps)
   const votosFiltrados = votos.filter(v => 
     v.pec.toLowerCase().includes(buscaVoto.toLowerCase())
   );
+
+  const handlePecClick = (pecIdentificacao: string) => {
+    onClose();
+    navigate(`/pecs?busca=${encodeURIComponent(pecIdentificacao)}`);
+  };
 
   return (
     <div
@@ -74,14 +81,15 @@ export function DeputadoModal({ politico, isOpen, onClose }: DeputadoModalProps)
               
               <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {votosFiltrados.length > 0 ? votosFiltrados.map((v, index) => (
-                  <div
+                  <button
                     key={index}
-                    className="bg-white border border-gray-100 rounded-lg p-2 shadow-sm"
+                    onClick={() => handlePecClick(v.pec)}
+                    className="w-full text-left p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
                   >
-                    <p className="text-[9px] font-black text-gray-400 uppercase mb-1.5 leading-tight">
+                    <p className="text-[10px] font-black text-gray-400 uppercase leading-tight group-hover:text-blue-600 transition-colors mb-2">
                       {v.pec}
                     </p>
-                    <div className="flex justify-between items-center border-t border-gray-50 pt-1.5">
+                    <div className="flex items-center justify-between">
                       <span
                         className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
                           v.voto === 'Sim'
@@ -95,7 +103,7 @@ export function DeputadoModal({ politico, isOpen, onClose }: DeputadoModalProps)
                         {v.data}
                       </span>
                     </div>
-                  </div>
+                  </button>
                 )) : (
                   <p className="text-[11px] text-gray-400 italic py-4 text-center">
                     {votos.length > 0 ? 'Sem resultados.' : 'Sem votos.'}
