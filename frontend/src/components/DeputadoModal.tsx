@@ -15,7 +15,11 @@ export function DeputadoModal({ politico, isOpen, onClose }: DeputadoModalProps)
   if (!isOpen) return null;
 
   const votos = politico.votos_recentes || [];
-  const votosFiltrados = votos.filter(v => 
+  
+  // De-duplicação de votos baseada no nome da PEC
+  const votosUnicos = Array.from(new Map(votos.map(v => [v.pec, v])).values());
+
+  const votosFiltrados = votosUnicos.filter(v => 
     v.pec.toLowerCase().includes(buscaVoto.toLowerCase())
   );
 

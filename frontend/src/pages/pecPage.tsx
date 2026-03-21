@@ -97,7 +97,7 @@ export function PecPage() {
     votos.votos.forEach(item => {
       const dataOriginal = item.data_votacao;
       const dataFormatada = new Date(dataOriginal).toLocaleDateString('pt-BR');
-      const id = dataOriginal; 
+      const id = `${dataOriginal}-${item.sessao_descricao}`; // Chave mais específica para evitar misturar sessões no mesmo dia
       
       if (!grupos[id]) {
         grupos[id] = {
@@ -108,10 +108,18 @@ export function PecPage() {
           votosSim: [],
           votosNao: [],
           votosAbstencao: [],
-          votosOutros: []
+          votosOutros: [],
+          politicosAdicionados: new Set() // Conjunto para controle de duplicatas
         };
       }
       
+      // Se o político já foi adicionado nesta sessão, ignora (evita duplicação da API)
+      if (grupos[id].politicosAdicionados.has(item.deputado)) {
+        return;
+      }
+      
+      grupos[id].politicosAdicionados.add(item.deputado);
+
       const deputadoInfo = {
         nome: item.deputado,
         partido: item.partido,
