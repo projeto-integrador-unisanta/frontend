@@ -50,43 +50,8 @@ export function Header() {
           </Link>
         ))}
       </nav>
-
-      {/* AÇÕES À DIREITA */}
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2 cursor-pointer hover:text-amber-400 transition-colors">
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          <span className="text-xs font-semibold uppercase">
-            Acesso Restrito
-          </span>
-        </div>
-        <svg
-          className="w-5 h-5 cursor-pointer hover:text-amber-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-        {/* Bandeira do Brasil estilizada */}
-        <div className="flex flex-col gap-0.5 w-6">
-          <div className="h-1 bg-green-600 rounded-sm"></div>
-          <div className="h-1 bg-yellow-400"></div>
-          <div className="h-1 bg-blue-700 rounded-sm"></div>
-        </div>
-      </div>
+      {/* ESPAÇADOR PARA MANTER O MENU CENTRALIZADO */}
+      <div className="w-[180px] hidden md:block"></div>
     </header>
   );
 }
