@@ -92,10 +92,10 @@ export function PecPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#001b3d] flex flex-col transition-colors duration-300">
       <Header />
-      <main className="max-w-6xl mx-auto flex flex-col p-10 flex-1">
-        <h1 className="text-3xl font-bold mb-6">Busca de PECs</h1>
+      <main className="max-w-6xl w-full mx-auto flex flex-col p-6 md:p-10 flex-1">
+        <h1 className="text-3xl font-bold mb-6 dark:text-white">Busca de PECs</h1>
 
         <PecFilters 
           busca={busca} 
@@ -105,16 +105,17 @@ export function PecPage() {
           anos={anos} 
         />
 
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-400 mb-6 font-medium">
           {pecsFiltradas.length} PECs encontradas
         </p>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-xl font-medium text-gray-500">Carregando...</p>
+          <div className="flex justify-center items-center py-20 flex-1">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-brandAccent"></div>
+            <p className="ml-3 text-xl font-medium text-gray-500 dark:text-gray-400">Carregando...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
             {error}
           </div>
         ) : (
@@ -126,8 +127,8 @@ export function PecPage() {
         )}
 
         {!loading && pecsFiltradas.length === 0 && !error && (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">
+          <div className="text-center py-20 flex-1">
+            <p className="text-gray-500 dark:text-gray-400 text-lg italic">
               Nenhuma PEC encontrada com esses filtros.
             </p>
           </div>

@@ -13,12 +13,12 @@ export function PecFilters({ busca, setBusca, ano, setAno, anos }: PecFiltersPro
         placeholder="Buscar por número, assunto ou nome popular da PEC..."
         value={busca}
         onChange={(e) => setBusca(e.target.value)}
-        className="flex-1 border rounded-xl p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        className="flex-1 border dark:border-white/10 rounded-xl p-3 shadow-sm bg-white dark:bg-[#001529] dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
       />
       <select
         value={ano}
         onChange={(e) => setAno(e.target.value)}
-        className="md:w-48 border rounded-xl p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+        className="md:w-48 border dark:border-white/10 rounded-xl p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-[#001529] dark:text-white transition-colors"
       >
         <option value="">Todos os anos</option>
         {anos.map((y) => (
