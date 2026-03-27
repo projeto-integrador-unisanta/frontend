@@ -1,19 +1,21 @@
-import { useState } from 'react';
 import { type Deputado } from '../models/deputado';
-import { DeputadoModal } from './DeputadoModal';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   Deputado: Deputado;
 }
 
 export function CardDeputado({ Deputado }: Props) {
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const handleNavegar = () => {
+    navigate('/deputado', { state: Deputado });
+  };
 
   return (
     <>
       {/* CARD */}
       <div
-        onClick={() => setOpen(true)}
+        onClick={() => handleNavegar()}
         className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-1"
       >
         {Deputado.fotoUrl && (
@@ -33,21 +35,20 @@ export function CardDeputado({ Deputado }: Props) {
 
         <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-2 font-medium uppercase tracking-wider">
           <p>
-            <span className="text-gray-400 dark:text-gray-500 font-bold">Estado:</span> {Deputado.estado ?? '-'}
+            <span className="text-gray-400 dark:text-gray-500 font-bold">
+              Estado:
+            </span>{' '}
+            {Deputado.estado ?? '-'}
           </p>
 
           <p>
-            <span className="text-gray-400 dark:text-gray-500 font-bold">Partido:</span> {Deputado.partido ?? '-'}
+            <span className="text-gray-400 dark:text-gray-500 font-bold">
+              Partido:
+            </span>{' '}
+            {Deputado.partido ?? '-'}
           </p>
         </div>
       </div>
-
-      {/* MODAL UNIFICADO */}
-      <DeputadoModal 
-        politico={Deputado} 
-        isOpen={open} 
-        onClose={() => setOpen(false)} 
-      />
     </>
   );
 }

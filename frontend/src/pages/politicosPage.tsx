@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { CardDeputado } from '../components/cardDeputado';
 import { Header } from '../components/Header';
 
@@ -11,8 +10,6 @@ import { usePartidos } from '../hooks/usePartidos';
 import { useDeputados } from '../hooks/useDeputados';
 
 export function PoliticosPage() {
-  const navigate = useNavigate();
-
   // Estados dos filtros
   const [busca, setBusca] = useState('');
   const [estado, setEstado] = useState('Todos');
@@ -61,7 +58,9 @@ export function PoliticosPage() {
           <h2 className="text-xl font-semibold dark:text-white">Filtros</h2>
 
           <div className="space-y-2">
-            <label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Partido</label>
+            <label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              Partido
+            </label>
             <select
               className="w-full border dark:border-white/10 rounded-lg p-2 bg-white dark:bg-[#001b3d] dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               value={partido}
@@ -77,7 +76,9 @@ export function PoliticosPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Estado</label>
+            <label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              Estado
+            </label>
             <select
               className="w-full border dark:border-white/10 rounded-lg p-2 bg-white dark:bg-[#001b3d] dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               value={estado}
@@ -94,7 +95,9 @@ export function PoliticosPage() {
         </aside>
 
         <main className="p-6 md:p-10 flex flex-col">
-          <h1 className="text-3xl font-bold mb-6 dark:text-white">Busca de deputados</h1>
+          <h1 className="text-3xl font-bold mb-6 dark:text-white">
+            Busca de deputados
+          </h1>
 
           <div className="relative mb-6">
             <input
@@ -103,8 +106,18 @@ export function PoliticosPage() {
               onChange={(e) => setBusca(e.target.value)}
               className="w-full border dark:border-white/10 rounded-xl p-3 pl-10 shadow-sm bg-white dark:bg-[#001529] dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
             />
-            <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
 
@@ -112,8 +125,10 @@ export function PoliticosPage() {
           {!loading && deputados.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-[#001529] p-4 rounded-xl mb-6 shadow-sm border border-gray-200 dark:border-white/10 transition-colors duration-300">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-0">
-                Página <strong className="dark:text-white">{paginaAtual}</strong> de{' '}
-                <strong className="dark:text-white">{totalPaginas}</strong> ({deputados.length} resultados)
+                Página{' '}
+                <strong className="dark:text-white">{paginaAtual}</strong> de{' '}
+                <strong className="dark:text-white">{totalPaginas}</strong> (
+                {deputados.length} resultados)
               </span>
               <div className="flex gap-2">
                 <button
@@ -164,8 +179,11 @@ export function PoliticosPage() {
               {deputados.length > 0 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-[#001529] p-4 rounded-xl mt-8 shadow-sm border border-gray-200 dark:border-white/10 transition-colors duration-300">
                   <span className="text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-0">
-                    Página <strong className="dark:text-white">{paginaAtual}</strong> de{' '}
-                    <strong className="dark:text-white">{totalPaginas}</strong> ({deputados.length} resultados)
+                    Página{' '}
+                    <strong className="dark:text-white">{paginaAtual}</strong>{' '}
+                    de{' '}
+                    <strong className="dark:text-white">{totalPaginas}</strong>{' '}
+                    ({deputados.length} resultados)
                   </span>
                   <div className="flex gap-2">
                     <button
