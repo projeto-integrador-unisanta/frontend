@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import type { Deputado } from '../models/deputado';
 import { useState, useMemo } from 'react';
+import { HistoricoVotacoes } from '../components/historicoVotacoes';
 
 const CATEGORIAS_NOMES = [
   'Bem-estar social',
@@ -141,56 +142,11 @@ export function DeputadoPage() {
         {/* GRID PRINCIPAL */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch flex-1 min-h-0">
           {/* VOTOS (ESQUERDA) */}
-          <section className="lg:col-span-8 flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 p-4">
-            {' '}
-            {/* Reduzi o p-5 para p-4 */}
-            <div className="flex-shrink-0 flex items-center justify-between mb-3 border-b border-gray-100 dark:border-white/10 pb-2">
-              <h4 className="text-[11px] font-black uppercase tracking-widest text-gray-400">
-                Histórico de Votações
-              </h4>
-              <input
-                type="text"
-                placeholder="Filtrar..."
-                value={buscaVoto}
-                onChange={(e) => setBuscaVoto(e.target.value)}
-                className="text-[10px] bg-gray-100 dark:bg-[#001b3d] border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1 w-32 outline-none font-bold dark:text-white"
-              />
-            </div>
-            {/* CONTÊINER COM ALTURA REDUZIDA */}
-            <div className="overflow-y-auto pr-1 custom-scrollbar max-h-[420px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-2 pr-3">
-                {votosFiltrados.map((v, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handlePecClick(v.pec)}
-                    className="flex flex-col p-3 rounded-xl border border-gray-100 dark:border-white/5 hover:border-blue-400 bg-gray-50 dark:bg-[#001b3d]/50 transition-all text-left group"
-                  >
-                    <div className="flex justify-between items-start mb-1 gap-2">
-                      <span className="text-[7px] font-bold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 uppercase">
-                        {(v as any).categoria || getCategoriaMock(v.pec)}
-                      </span>
-                      <span className="text-[8px] text-gray-400 font-bold">
-                        {v.data}
-                      </span>
-                    </div>
-                    <p className="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase line-clamp-1 mb-1">
-                      {v.pec}
-                    </p>
-                    <span
-                      className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase w-fit ${
-                        v.voto === 'Sim'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                      }`}
-                    >
-                      {v.voto}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-
+          <HistoricoVotacoes
+            votos={votosUnicos}
+            onPecClick={handlePecClick}
+            getCategoriaMock={getCategoriaMock}
+          />
           {/* MÉTRICAS COMPLETAS (DIREITA) */}
           <section className="lg:col-span-4 flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 p-5 self-start">
             <h4 className="flex-shrink-0 text-[11px] font-black uppercase tracking-widest mb-4 border-b border-gray-100 dark:border-white/10 pb-3 text-gray-400">

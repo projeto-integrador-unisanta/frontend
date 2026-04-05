@@ -10,14 +10,20 @@ import {
 
 export function RadarCategorias({ data }: any) {
   return (
-    <div className="w-full h-full">
-      {' '}
-      {/* Garanta que o pai defina a altura, ex: h-80 */}
-      <ResponsiveContainer width="100%" height="100%">
+    // Mudança: Adicionado min-h para evitar erro de height(-1)
+    // e w-full para garantir preenchimento
+    <div className="w-full h-full min-h-[300px]">
+      {/* 
+        Mudança: Adicionado minWidth={0} 
+        Isso ajuda o ResponsiveContainer a lidar com flexbox/grid 
+      */}
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <RadarChart
           data={data}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-          outerRadius="80%"
+          // Margens amplas para os rótulos de texto (labels)
+          margin={{ top: 25, right: 50, bottom: 25, left: 50 }}
+          // Raio reduzido para o texto não encostar na borda do SVG
+          outerRadius="60%"
         >
           <defs>
             <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -26,11 +32,17 @@ export function RadarCategorias({ data }: any) {
             </linearGradient>
           </defs>
 
-          <PolarGrid stroke="#e5e7eb" />
+          <PolarGrid stroke="#e5e7eb" strokeOpacity={0.2} />
 
           <PolarAngleAxis
             dataKey="subject"
-            tick={{ fill: '#6b7280', fontSize: 10 }}
+            tick={{
+              fill: 'currentColor',
+              fontSize: 11,
+              fontWeight: 500,
+            }}
+            // Cores adaptativas via Tailwind
+            className="text-gray-500 dark:text-gray-400"
           />
 
           <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
@@ -43,7 +55,15 @@ export function RadarCategorias({ data }: any) {
             fillOpacity={0.8}
           />
 
-          <Tooltip />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#1f2937',
+              border: 'none',
+              borderRadius: '8px',
+              color: '#fff',
+              fontSize: '12px',
+            }}
+          />
         </RadarChart>
       </ResponsiveContainer>
     </div>
