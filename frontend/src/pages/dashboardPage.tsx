@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'; // Adicionado
 import { type metricaExpandida } from '../models/metricaExpandida';
 import {
   mapDeputadoToCharts,
@@ -10,31 +11,42 @@ import { PieVotos } from '../components/pieVotos';
 import { BarCategorias } from '../components/barChart';
 import { IdeologiaDistribuicao } from '../components/IdeologiaDistribuicao';
 import { HistoricoVotacoes } from '../components/historicoVotacoes';
-import { useNavigate } from 'react-router-dom';
-import { use } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
+import type { Deputado } from '../models/deputado';
 
 type Props = {
   deputado: metricaExpandida;
 };
 
 export function Dashboard({ deputado }: Props) {
+  const location = useLocation();
+  const dados = location.state as Deputado;
+
   const { categorias, votos } = mapDeputadoToCharts(deputado);
   const ideologiaData = mapIdeologiaProbabilidades(deputado);
   const votosParaHistorico = deputado.deputado.votos_recentes || [];
   const navigate = useNavigate();
 
+  // Estado para garantir que o código só rode no cliente (evita erro de width -1)
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const handlePecClick = (pecIdentificacao: string) => {
     navigate(`/pecs?busca=${encodeURIComponent(pecIdentificacao)}`);
   };
 
+  // Trava de segurança para dados
+  const hasData = isMounted && categorias && ideologiaData;
+
   return (
-    // Alterado: bg-gray-100 -> dark:bg-[#001b3d]
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-[#001b3d] transition-colors duration-300">
       <Header />
       <div className="space-y-6 bg-gray-100 dark:bg-[#001b3d] min-h-screen transition-colors duration-300">
-        {/* ================= CARD PRINCIPAL (FOTO + SCORE + Radar) ================= */}
-        {/* Alterado: Adicionado dark:from-white/5 dark:to-white/10 e borda sutil */}
+        {/* ================= CARD PRINCIPAL ================= */}
         <div className="bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/10 p-6 rounded-2xl shadow border border-transparent dark:border-white/10">
           <div className="flex items-start">
             <div className="relative z-10 flex-shrink-0">
@@ -48,8 +60,7 @@ export function Dashboard({ deputado }: Props) {
             </div>
 
             <div className="relative z-0 -ml-18 pt-2">
-              {/* Alterado: bg-white -> dark:bg-[#001b3d] */}
-              <div className="w-62 h-52 bg-white dark:bg-white/0  shadow-inner flex items-center justify-center border border-gray-100 dark:border-white/10">
+              <div className="w-62 h-52 bg-white dark:bg-white/0 shadow-inner flex items-center justify-center border border-gray-100 dark:border-white/10">
                 <ScoreCard
                   score={deputado.ideologia.score}
                   classificacao={deputado.ideologia.classificacao}
@@ -58,15 +69,12 @@ export function Dashboard({ deputado }: Props) {
             </div>
 
             <div className="flex-1 pt-4 ml-10">
-              {/* Alterado: text-gray-900 -> dark:text-white */}
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
                 {deputado.deputado.nomeUrna}
               </h1>
-              {/* Alterado: text-gray-500 -> dark:text-gray-400 */}
               <p className="text-lg text-gray-500 dark:text-gray-400 mt-2">
                 Deputado Federal | {deputado.partido} - {deputado.estado}
               </p>
-
               {deputado.deputado.email && (
                 <p className="text-lg text-gray-500 dark:text-gray-400 mt-2">
                   {deputado.deputado.email.toLowerCase()}
@@ -74,28 +82,26 @@ export function Dashboard({ deputado }: Props) {
               )}
             </div>
 
-            {/* No Dashboard, onde você chama o RadarCategorias */}
             <div className="w-full lg:w-[400px] flex-shrink-0 min-w-0">
               <div className="h-[250px] flex flex-col">
-                {' '}
-                {/* Aumentei um pouco a altura para acomodar as labels */}
                 <span className="text-sm uppercase tracking-widest text-gray-400 dark:text-gray-500 font-bold mb-2">
                   Perfil de Atuação
                 </span>
                 <div className="flex-1 min-h-0">
-                  {/* Garanta que dentro de <RadarCategorias> o ResponsiveContainer tenha minWidth={0} */}
-                  <RadarCategorias data={categorias} />
+                  {/* Modificação: Só renderiza se montado e com dados */}
+                  {hasData ? (
+                    <RadarCategorias data={categorias} />
+                  ) : (
+                    <div className="h-full" />
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ================= LINHA 1: PIE E IDEOLOGIA (LADO A LADO) ================= */}
-
+        {/* ================= LINHA 1 ================= */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
-          {/* COLUNA 1: Histórico */}
-          {/* Alterado: bg-white -> dark:bg-white/5 e borda */}
           <div className="md:col-span-4 bg-white/5 dark:bg-white/5 p-6 rounded-2xl shadow flex flex-col ">
             <HistoricoVotacoes
               votos={votosParaHistorico}
@@ -106,13 +112,16 @@ export function Dashboard({ deputado }: Props) {
 
           <div className="md:col-span-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             {/* 2. Proporção de Votos */}
-            {/* Alterado: bg-white -> dark:bg-white/5 */}
             <div className="lg:col-span-4 bg-white dark:bg-white/5 p-4 rounded-2xl shadow flex flex-col items-center border border-transparent dark:border-white/10">
               <h2 className="font-bold mb-2 text-gray-700 dark:text-gray-300 uppercase text-[10px] tracking-widest self-start border-b border-gray-100 dark:border-white/10 w-full pb-1">
                 Proporção de Votos
               </h2>
-              <div className="flex-1 flex items-center justify-center w-full overflow-hidden">
-                <PieVotos data={votos} />
+              <div className="flex-1 flex items-center justify-center w-full overflow-hidden min-h-[250px]">
+                {hasData ? (
+                  <PieVotos data={votos} />
+                ) : (
+                  <div className="h-full" />
+                )}
               </div>
             </div>
 
@@ -125,19 +134,30 @@ export function Dashboard({ deputado }: Props) {
                 Probabilidade baseada nos votos
               </p>
               <div className="flex-1 w-full overflow-hidden min-h-[250px]">
-                <IdeologiaDistribuicao data={ideologiaData} />
+                {/* Modificação: Só renderiza se montado e com dados para evitar o sumiço */}
+                {hasData && ideologiaData.length > 0 ? (
+                  <IdeologiaDistribuicao data={ideologiaData} />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400 text-xs animate-pulse">
+                    Carregando...
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* ================= LINHA 2: BARRA CATEGORIAS (LARGURA TOTAL) ================= */}
+        {/* ================= LINHA 2: BARRA CATEGORIAS ================= */}
         <div className="bg-white dark:bg-white/5 p-6 rounded-2xl shadow border border-transparent dark:border-white/10">
           <h2 className="font-semibold mb-6 text-lg border-b border-gray-100 dark:border-white/10 pb-2 text-gray-900 dark:text-white">
             Desempenho por Categorias
           </h2>
           <div className="h-[400px] w-full">
-            <BarCategorias data={categorias} />
+            {hasData ? (
+              <BarCategorias data={categorias} />
+            ) : (
+              <div className="h-full" />
+            )}
           </div>
         </div>
       </div>

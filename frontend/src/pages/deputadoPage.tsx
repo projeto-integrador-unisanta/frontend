@@ -104,6 +104,9 @@ export function DeputadoPage() {
                 <p className="text-blue-600 dark:text-brandAccent font-black tracking-widest uppercase text-[10px] mb-1">
                   Deputado Federal | {dados.partido} - {dados.estado}
                 </p>
+                <p className="text-blue-600 dark:text-brandAccent font-black tracking-widest uppercase text-[10px] mb-1">
+                  {dados.idApi}
+                </p>
                 {dados.email && (
                   <p className="text-gray-400 dark:text-white/40 font-bold text-[10px] uppercase">
                     {dados.email.toLowerCase()}

@@ -33,6 +33,7 @@ export function BarCategorias({ data }: any) {
 
         <YAxis
           domain={[0, 10]}
+          ticks={[0, 2, 4, 6, 8, 10]}
           tick={{ fill: '#6b7280', fontSize: 12 }}
           axisLine={false}
           tickLine={false}
