@@ -1,8 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { CardDeputado } from '../components/cardDeputado';
 import { Header } from '../components/Header';
-
-// Importação dos hooks
 import { useDeputadosEstado } from '../hooks/useDeputadosEstado';
 import { useDeputadosPartido } from '../hooks/useDeputadosPartido';
 import { useEstados } from '../hooks/useEstados';
@@ -10,16 +8,13 @@ import { usePartidos } from '../hooks/usePartidos';
 import { useDeputados } from '../hooks/useDeputados';
 
 export function PoliticosPage() {
-  // Estados dos filtros
   const [busca, setBusca] = useState('');
   const [estado, setEstado] = useState('Todos');
   const [partido, setPartido] = useState('Todos');
 
-  // 1. ESTADO DE PAGINAÇÃO
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 12;
 
-  // Listas para os Selects
   const { estados } = useEstados();
   const { partidos } = usePartidos();
 
@@ -35,13 +30,10 @@ export function PoliticosPage() {
 
   const { deputados, loading, error } = fonteAtiva;
 
-  // 2. RESETAR PÁGINA AO FILTRAR
-  // Sempre que mudar a busca, estado ou partido, voltamos para a página 1
   useEffect(() => {
     setPaginaAtual(1);
   }, [busca, estado, partido]);
 
-  // 3. LÓGICA DE PAGINAÇÃO LOCAL
   const totalPaginas = Math.ceil(deputados.length / itensPorPagina);
 
   const deputadosExibidos = useMemo(() => {
@@ -121,7 +113,6 @@ export function PoliticosPage() {
             </svg>
           </div>
 
-          {/* 4. CONTROLES DE PAGINAÇÃO */}
           {!loading && deputados.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-[#001529] p-4 rounded-xl mb-6 shadow-sm border border-gray-200 dark:border-white/10 transition-colors duration-300">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-0">
@@ -169,13 +160,10 @@ export function PoliticosPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {/* MAPEAMOS OS EXIBIDOS (SLICE) E NÃO TODOS */}
                 {deputadosExibidos.map((dep: any) => (
                   <CardDeputado key={dep.id} Deputado={dep} />
                 ))}
               </div>
-
-              {/* CONTROLES DE PAGINAÇÃO (INFERIOR) */}
               {deputados.length > 0 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between bg-white dark:bg-[#001529] p-4 rounded-xl mt-8 shadow-sm border border-gray-200 dark:border-white/10 transition-colors duration-300">
                   <span className="text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-0">

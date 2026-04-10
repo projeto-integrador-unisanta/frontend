@@ -10,19 +10,11 @@ import {
 
 export function RadarCategorias({ data }: any) {
   return (
-    // Mudança: Adicionado min-h para evitar erro de height(-1)
-    // e w-full para garantir preenchimento
     <div className="w-full h-full min-h-[300px]">
-      {/* 
-        Mudança: Adicionado minWidth={0} 
-        Isso ajuda o ResponsiveContainer a lidar com flexbox/grid 
-      */}
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <RadarChart
           data={data}
-          // Margens amplas para os rótulos de texto (labels)
           margin={{ top: 25, right: 50, bottom: 25, left: 50 }}
-          // Raio reduzido para o texto não encostar na borda do SVG
           outerRadius="60%"
         >
           <defs>
@@ -41,7 +33,6 @@ export function RadarCategorias({ data }: any) {
               fontSize: 11,
               fontWeight: 500,
             }}
-            // Cores adaptativas via Tailwind
             className="text-gray-500 dark:text-gray-400"
           />
 

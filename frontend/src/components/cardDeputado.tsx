@@ -8,12 +8,11 @@ interface Props {
 export function CardDeputado({ Deputado }: Props) {
   const navigate = useNavigate();
   const handleNavegar = () => {
-    navigate('/deputado', { state: Deputado });
+    navigate('/dashboard', { state: Deputado });
   };
 
   return (
     <>
-      {/* CARD */}
       <div
         onClick={() => handleNavegar()}
         className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-1"

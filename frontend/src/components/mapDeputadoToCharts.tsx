@@ -1,10 +1,10 @@
-import { type metricaExpandida } from '../models/metricaExpandida';
+import { type MetricaExpandida } from '../models/deputadoIdeologia';
 
-export function mapDeputadoToCharts(data: metricaExpandida) {
-  const total = data.estatisticas.total_votos;
+export function mapDeputadoToCharts(ideologia: MetricaExpandida) {
+  const total = ideologia.estatisticas.total_votos;
 
   return {
-    categorias: data.categorias.map((c) => ({
+    categorias: ideologia.categorias.map((c) => ({
       subject: c.categoria,
       nota: c.nota,
       status: c.nota >= 7 ? 'alto' : c.nota >= 5 ? 'medio' : 'baixo',
@@ -13,13 +13,13 @@ export function mapDeputadoToCharts(data: metricaExpandida) {
     votos: [
       {
         name: 'Sim',
-        value: data.estatisticas.sim,
-        percent: (data.estatisticas.sim / total) * 100,
+        value: ideologia.estatisticas.sim,
+        percent: (ideologia.estatisticas.sim / total) * 100,
       },
       {
         name: 'Não',
-        value: data.estatisticas.nao,
-        percent: (data.estatisticas.nao / total) * 100,
+        value: ideologia.estatisticas.nao,
+        percent: (ideologia.estatisticas.nao / total) * 100,
       },
     ],
   };

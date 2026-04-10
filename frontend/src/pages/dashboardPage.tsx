@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'; // Adicionado
-import { type metricaExpandida } from '../models/metricaExpandida';
+import { useState, useEffect } from 'react';
 import {
   mapDeputadoToCharts,
   mapIdeologiaProbabilidades,
@@ -14,34 +13,39 @@ import { HistoricoVotacoes } from '../components/historicoVotacoes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import type { Deputado } from '../models/deputado';
+import { useDeputadoCompleto } from '../hooks/useDeputadoExpandido';
 
-type Props = {
-  deputado: metricaExpandida;
-};
-
-export function Dashboard({ deputado }: Props) {
+export function Dashboard() {
   const location = useLocation();
-  const dados = location.state as Deputado;
-
-  const { categorias, votos } = mapDeputadoToCharts(deputado);
-  const ideologiaData = mapIdeologiaProbabilidades(deputado);
-  const votosParaHistorico = deputado.deputado.votos_recentes || [];
   const navigate = useNavigate();
 
-  // Estado para garantir que o código só rode no cliente (evita erro de width -1)
+  const dados = location.state as Deputado | null;
+
+  const { ideologia, ideal, loading, error } = useDeputadoCompleto(
+    dados?.idApi || '',
+  );
+
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  if (!dados) return <p>Sem dados</p>;
+  if (loading) return <p>Carregando...</p>;
+  if (error) return <p>Erro ao carregar</p>;
+  if (!ideologia || !ideal) return <p>Sem dados suficientes</p>;
+
+  const { categorias, votos } = mapDeputadoToCharts(ideologia);
+  const ideologiaData = mapIdeologiaProbabilidades(ideal);
+  const votosParaHistorico = dados.votos_recentes || [];
+
   const handlePecClick = (pecIdentificacao: string) => {
     navigate(`/pecs?busca=${encodeURIComponent(pecIdentificacao)}`);
   };
 
-  // Trava de segurança para dados
-  const hasData = isMounted && categorias && ideologiaData;
-
+  const hasData =
+    isMounted && categorias?.length > 0 && ideologiaData?.length > 0;
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-[#001b3d] transition-colors duration-300">
       <Header />
@@ -50,10 +54,10 @@ export function Dashboard({ deputado }: Props) {
         <div className="bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/10 p-6 rounded-2xl shadow border border-transparent dark:border-white/10">
           <div className="flex items-start">
             <div className="relative z-10 flex-shrink-0">
-              {deputado.deputado.fotoUrl && (
+              {dados.fotoUrl && (
                 <img
-                  src={deputado.deputado.fotoUrl}
-                  alt={deputado.deputado.nomeUrna}
+                  src={dados.fotoUrl}
+                  alt={dados.nomeUrna}
                   className="w-40 h-56 rounded-2xl object-cover shadow-2xl border-4 border-white dark:border-white/20"
                 />
               )}
@@ -62,22 +66,22 @@ export function Dashboard({ deputado }: Props) {
             <div className="relative z-0 -ml-18 pt-2">
               <div className="w-62 h-52 bg-white dark:bg-white/0 shadow-inner flex items-center justify-center border border-gray-100 dark:border-white/10">
                 <ScoreCard
-                  score={deputado.ideologia.score}
-                  classificacao={deputado.ideologia.classificacao}
+                  score={ideologia.ideologia.score}
+                  classificacao={ideologia.ideologia.classificacao}
                 />
               </div>
             </div>
 
             <div className="flex-1 pt-4 ml-10">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
-                {deputado.deputado.nomeUrna}
+                {dados.nomeUrna}
               </h1>
               <p className="text-lg text-gray-500 dark:text-gray-400 mt-2">
-                Deputado Federal | {deputado.partido} - {deputado.estado}
+                Deputado Federal | {dados.partido} - {dados.estado}
               </p>
-              {deputado.deputado.email && (
+              {dados.email && (
                 <p className="text-lg text-gray-500 dark:text-gray-400 mt-2">
-                  {deputado.deputado.email.toLowerCase()}
+                  {dados.email.toLowerCase()}
                 </p>
               )}
             </div>
@@ -88,7 +92,6 @@ export function Dashboard({ deputado }: Props) {
                   Perfil de Atuação
                 </span>
                 <div className="flex-1 min-h-0">
-                  {/* Modificação: Só renderiza se montado e com dados */}
                   {hasData ? (
                     <RadarCategorias data={categorias} />
                   ) : (
@@ -134,7 +137,6 @@ export function Dashboard({ deputado }: Props) {
                 Probabilidade baseada nos votos
               </p>
               <div className="flex-1 w-full overflow-hidden min-h-[250px]">
-                {/* Modificação: Só renderiza se montado e com dados para evitar o sumiço */}
                 {hasData && ideologiaData.length > 0 ? (
                   <IdeologiaDistribuicao data={ideologiaData} />
                 ) : (
