@@ -64,9 +64,8 @@ export function Dashboard() {
             </div>
 
             <div className="relative z-0 -ml-18 pt-2">
-              <div className="w-62 h-52 bg-white dark:bg-white/0 shadow-inner flex items-center justify-center border border-gray-100 dark:border-white/10">
+              <div className="w-62 h-52  dark:bg-white/0 shadow-inner flex items-center justify-center">
                 <ScoreCard
-                  score={ideologia.ideologia.score}
                   classificacao={ideologia.ideologia.classificacao}
                 />
               </div>
