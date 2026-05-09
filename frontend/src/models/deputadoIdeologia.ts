@@ -8,6 +8,13 @@ export interface IdeologiaInfo {
   classificacao: string;
   base_partido: number;
   alinhamento: number;
+  score_votos?: number;
+}
+
+export interface ConfiancaInfo {
+  nivel: 'alta' | 'moderada' | 'baixa';
+  peso_comportamento: number;
+  votos_relevantes: number;
 }
 
 export interface EstatisticasVotos {
@@ -22,6 +29,8 @@ export interface MetricaExpandida {
   partido: string;
   estado: string;
   ideologia: IdeologiaInfo;
+  confianca?: ConfiancaInfo;
+  resumo?: string[];
   categorias: CategoriaDesempenho[];
   estatisticas: EstatisticasVotos;
 }

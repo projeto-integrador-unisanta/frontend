@@ -11,6 +11,7 @@ export function Header() {
     { label: 'Políticos', path: '/politicos' },
     { label: 'PECs', path: '/pecs' },
     { label: 'Match Eleitoral', path: '/fit' },
+    { label: 'Metodologia', path: '/metodologia' },
   ];
 
   return (
