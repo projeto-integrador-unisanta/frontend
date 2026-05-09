@@ -49,6 +49,18 @@ export function DeputadoModal({ politico, isOpen, onClose }: DeputadoModalProps)
                 />
               )}
               <h2 className="text-lg font-black uppercase tracking-tight leading-tight">{politico.nomeUrna}</h2>
+              <button 
+                onClick={() => {
+                  onClose();
+                  navigate('/dashboard', { state: politico });
+                }}
+                className="mt-2 text-[9px] font-black text-blue-600 dark:text-brandAccent hover:bg-blue-600/5 dark:hover:bg-brandAccent/10 border border-blue-600/40 dark:border-brandAccent py-1.5 px-2 rounded-lg uppercase tracking-widest transition-all flex items-center justify-center gap-1 group w-full"
+              >
+                Ver detalhes
+                <svg className="w-2.5 h-2.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
 

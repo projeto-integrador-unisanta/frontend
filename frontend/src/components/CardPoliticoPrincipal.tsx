@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type Deputado } from '../models/deputado';
 import { DeputadoModal } from './DeputadoModal';
 
@@ -8,6 +9,7 @@ interface CardPoliticoPrincipalProps {
 
 export function CardPoliticoPrincipal({ politico }: CardPoliticoPrincipalProps) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const votos = politico.votos_recentes || [];
   const totalPecs = votos.length;
   
@@ -16,6 +18,10 @@ export function CardPoliticoPrincipal({ politico }: CardPoliticoPrincipalProps) 
   
   const percentSim = totalPecs > 0 ? Math.round((simVotos / totalPecs) * 100) : 0;
   const percentNao = totalPecs > 0 ? Math.round((naoVotos / totalPecs) * 100) : 0;
+
+  const handleVerDetalhes = () => {
+    navigate('/dashboard', { state: politico });
+  };
 
   return (
     <>
@@ -33,7 +39,7 @@ export function CardPoliticoPrincipal({ politico }: CardPoliticoPrincipalProps) 
         </div>
         
         <div className="border-t border-gray-100 dark:border-white/5 pt-4 flex flex-col gap-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center text-cursor-pointer" onClick={() => setOpen(true)}>
             <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total de PECs Votadas</span>
             <span className="font-black text-lg dark:text-brandAccent">{totalPecs}</span>
           </div>
@@ -83,3 +89,4 @@ export function CardPoliticoPrincipal({ politico }: CardPoliticoPrincipalProps) 
     </>
   );
 }
+

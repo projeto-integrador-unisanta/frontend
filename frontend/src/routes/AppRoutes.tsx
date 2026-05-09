@@ -3,7 +3,7 @@ import { HomePage } from '../pages/homePage';
 import { PoliticosPage } from '../pages/politicosPage';
 import { PecPage } from '../pages/pecPage';
 import { FitPage } from '../pages/fitPage';
-// import { DeputadoPage } from '../pages/deputadoPage';
+import { DeputadoPage } from '../pages/deputadoPage';
 import { Dashboard } from '../pages/dashboardPage';
 import { MetodologiaPage } from '../pages/metodologiaPage';
 
@@ -14,9 +14,10 @@ export function AppRoutes() {
       <Route path="/politicos" element={<PoliticosPage />} />
       <Route path="/pecs" element={<PecPage />} />
       <Route path="/fit" element={<FitPage />} />
-      {/* <Route path="/deputado" element={<DeputadoPage />} /> */}
+      <Route path="/deputado" element={<DeputadoPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/metodologia" element={<MetodologiaPage />} />
     </Routes>
   );
 }
+
