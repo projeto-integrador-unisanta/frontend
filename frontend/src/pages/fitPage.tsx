@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { FIT_TAGS_STORAGE_KEY } from '../services/matchService';
+import { compassService, type UsuarioCompass } from '../services/compassService';
+import { CardCompassUsuario } from '../components/CardCompassUsuario';
 
 interface Justificativa {
   pec: string;
@@ -139,6 +141,9 @@ export function FitPage() {
   const [politicoSelecionado, setPoliticoSelecionado] =
     useState<PoliticoFit | null>(null);
 
+  const [compassUsuario, setCompassUsuario] =
+    useState<UsuarioCompass['compass'] | null>(null);
+
   useEffect(() => {
     async function fetchTags() {
       try {
@@ -216,6 +221,17 @@ export function FitPage() {
     setTagsFit(tagsAgrees);
     setStep('result');
 
+    // Compass roda em paralelo com o fit — não bloqueia o ranking.
+    // Considera TODAS as respostas (agree/disagree), não só agrees,
+    // porque "discordo" também é informação ideológica.
+    compassService
+      .porRespostasQuiz(respostasFinais)
+      .then((res) => setCompassUsuario(res.compass))
+      .catch((err) => {
+        console.error('Erro ao calcular compass do usuário:', err);
+        setCompassUsuario(null);
+      });
+
     if (tagsAgrees.length === 0) {
       setResultados([]);
       setCurrentPage(1);
@@ -249,6 +265,7 @@ export function FitPage() {
     setTagsFit([]);
     setCurrentPage(1);
     setHasMore(false);
+    setCompassUsuario(null);
   };
 
   const handleNextPage = () => {
@@ -423,6 +440,10 @@ export function FitPage() {
                 Refazer o Teste
               </button>
             </div>
+
+            {compassUsuario && (
+              <CardCompassUsuario compass={compassUsuario} />
+            )}
 
             {loading ? (
               <div className="bg-white dark:bg-[#001529] p-12 rounded-2xl border border-gray-200 dark:border-white/10 text-center">
