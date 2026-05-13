@@ -6,6 +6,7 @@ import { FitPage } from '../pages/fitPage';
 import { DeputadoPage } from '../pages/deputadoPage';
 import { Dashboard } from '../pages/dashboardPage';
 import { MetodologiaPage } from '../pages/metodologiaPage';
+import { EspectroPage } from '../pages/espectroPage';
 
 export function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ export function AppRoutes() {
       <Route path="/deputado" element={<DeputadoPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/metodologia" element={<MetodologiaPage />} />
+      <Route path="/espectro" element={<EspectroPage />} />
     </Routes>
   );
 }

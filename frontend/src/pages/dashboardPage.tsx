@@ -23,6 +23,7 @@ import {
 } from '../services/matchService';
 import { coberturaService } from '../services/coberturaService';
 import { CoberturaBanner } from '../components/coberturaBanner';
+import { CardCompassDeputado } from '../components/CardCompassDeputado';
 
 const CATEGORIAS_NOMES = [
   'Bem-estar social',
@@ -631,6 +632,12 @@ export function Dashboard() {
           basePartido={base_partido}
           alinhamento={alinhamento}
           confianca={ideologia.confianca}
+        />
+
+        {/* COMPASS 2D — espectro bidimensional + confiança por eixo */}
+        <CardCompassDeputado
+          idApi={dados.idApi}
+          nomeDeputado={dados.nomeUrna}
         />
 
         {/* ESTATÍSTICAS */}
