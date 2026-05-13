@@ -1,18 +1,35 @@
 import { PieChart, Pie, Tooltip, Cell, ResponsiveContainer } from 'recharts';
 
-export function PieVotos({ data }: any) {
+export function PieVotos({
+  data,
+  height = 200,
+  innerRadius = 65,
+  outerRadius = 90,
+}: {
+  data: any;
+  height?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+}) {
   const COLORS = {
     Sim: '#22c55e',
     Nao: '#ef4444',
   };
 
+  if (!data || data.length === 0) {
+    return <div className="flex items-center justify-center text-gray-400 text-xs italic" style={{ height }}>Sem dados</div>;
+  }
+
+  const simData = data.find((d: any) => d.name === 'Sim');
+  const percentSim = simData ? simData.percent : 0;
+
   return (
-    <ResponsiveContainer width="100%" height={200}>
+    <ResponsiveContainer width="100%" height={height}>
       <PieChart>
         <Pie
           data={data}
-          innerRadius={65}
-          outerRadius={90}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
           dataKey="value"
           paddingAngle={3}
           stroke="none"
@@ -25,28 +42,18 @@ export function PieVotos({ data }: any) {
           ))}
         </Pie>
 
-        {/* TOOLTIP CORRIGIDO */}
         <Tooltip
-          // O cursor: pointer ajuda a dar feedback visual
           cursor={{ fill: 'transparent' }}
           contentStyle={{
-            backgroundColor: '#ffffff', // Fundo branco no modo claro
-            color: '#111827', // Texto escuro no modo claro
+            backgroundColor: '#ffffff',
+            color: '#111827',
             borderRadius: '8px',
             border: '1px solid #e5e7eb',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
           }}
-          // Seletor para quando o sistema/pai estiver em dark mode
           itemStyle={{ fontWeight: 'bold' }}
-          // Esta função garante que o estilo mude dinamicamente se você não quiser usar CSS puro
           wrapperStyle={{ outline: 'none', zIndex: 1000 }}
         />
-
-        {/* Se o Tooltip ainda estiver estranho, use este estilo global ou injetado via Tailwind no Dashboard:
-            .recharts-default-tooltip {
-              @apply bg-white dark:bg-gray-800 border-none shadow-xl rounded-lg !important;
-            }
-        */}
 
         <text
           x="50%"
@@ -55,7 +62,7 @@ export function PieVotos({ data }: any) {
           dominantBaseline="middle"
           className="fill-gray-900 dark:fill-white font-bold text-sm"
         >
-          {`${data[0].percent.toFixed(0)}% Sim`}
+          {`${(percentSim || 0).toFixed(0)}% Sim`}
         </text>
       </PieChart>
     </ResponsiveContainer>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   mapDeputadoToCharts,
@@ -23,6 +23,36 @@ import {
 } from '../services/matchService';
 import { coberturaService } from '../services/coberturaService';
 import { CoberturaBanner } from '../components/coberturaBanner';
+
+const CATEGORIAS_NOMES = [
+  'Bem-estar social',
+  'Economia e trabalho',
+  'Justiça, leis e segurança',
+  'Política e governança',
+  'Meio ambiente e recursos naturais',
+  'Infraestrutura e urbanização',
+  'Direitos humanos e sociedade',
+  'Relações internacionais',
+  'Ciência, tecnologia e informação',
+  'Cultura, esporte e lazer',
+  'Pauta Bolsonarista',
+  'Pauta Governo',
+];
+
+const getCategoriaMock = (pecNome: string) => {
+  if (!pecNome) return 'Geral';
+  const nomeLower = pecNome.toLowerCase();
+  if (nomeLower.includes('tributária') || nomeLower.includes('imposto'))
+    return 'Economia e trabalho';
+  if (nomeLower.includes('reforma')) return 'Política e governança';
+  if (nomeLower.includes('armas') || nomeLower.includes('liberdade'))
+    return 'Pauta Bolsonarista';
+  if (nomeLower.includes('social') || nomeLower.includes('incentivo'))
+    return 'Pauta Governo';
+
+  const hash = pecNome.length % CATEGORIAS_NOMES.length;
+  return CATEGORIAS_NOMES[hash];
+};
 
 function findPecByLabel(pecs: PEC[], label: string): PEC | null {
   if (!label) return null;
@@ -335,6 +365,15 @@ export function Dashboard() {
   } | null>(null);
   const [match, setMatch] = useState<MatchResultado | null>(null);
   const [mediaCamara, setMediaCamara] = useState<number | null>(null);
+  const [showAllCategorias, setShowAllCategorias] = useState(false);
+  const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null);
+
+  const scrollParaHistorico = () => {
+    const el = document.getElementById('secao-historico');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -390,6 +429,68 @@ export function Dashboard() {
     };
   }, [dados?.idApi]);
 
+  const votosParaHistorico = useMemo(() => dados?.votos_recentes || [], [dados]);
+
+  const votosPorCategoria = useMemo(() => {
+    if (!votosParaHistorico || votosParaHistorico.length === 0) return [];
+
+    const agrupamento: Record<string, { sim: number; nao: number }> = {};
+
+    votosParaHistorico.forEach((v) => {
+      const cat = getCategoriaMock(v.pec);
+      if (!agrupamento[cat]) {
+        agrupamento[cat] = { sim: 0, nao: 0 };
+      }
+      if (v.voto === 'Sim') agrupamento[cat].sim++;
+      else if (v.voto === 'Não') agrupamento[cat].nao++;
+    });
+
+    return Object.entries(agrupamento)
+      .map(([nome, counts]) => {
+        const total = counts.sim + counts.nao;
+        return {
+          nome,
+          total,
+          votos: [
+            {
+              name: 'Sim',
+              value: counts.sim,
+              percent: total > 0 ? (counts.sim / total) * 100 : 0,
+            },
+            {
+              name: 'Não',
+              value: counts.nao,
+              percent: total > 0 ? (counts.nao / total) * 100 : 0,
+            },
+          ],
+        };
+      })
+      .filter((cat) => cat.total > 0)
+      .sort((a, b) => b.total - a.total);
+  }, [votosParaHistorico]);
+
+  const handlePecClick = (pecIdentificacao: string) => {
+    const voto = votosParaHistorico.find((v) => v.pec === pecIdentificacao);
+    setPecSelecionada({
+      pec: findPecByLabel(pecsCache, pecIdentificacao),
+      raw: pecIdentificacao,
+      voto: voto?.voto,
+      data: voto?.data,
+    });
+  };
+
+  const votosFiltrados = useMemo(() => {
+    if (!filtroCategoria) return votosParaHistorico;
+    return votosParaHistorico.filter(
+      (v) => getCategoriaMock(v.pec) === filtroCategoria,
+    );
+  }, [votosParaHistorico, filtroCategoria]);
+
+  const navegarParaPec = (busca: string) => {
+    setPecSelecionada(null);
+    navigate(`/pecs?busca=${encodeURIComponent(busca)}`);
+  };
+
   const limparPerfilQuiz = () => {
     localStorage.removeItem(FIT_TAGS_STORAGE_KEY);
     setMatch(null);
@@ -431,25 +532,9 @@ export function Dashboard() {
 
   const { categorias, votos } = mapDeputadoToCharts(ideologia);
   const ideologiaData = mapIdeologiaProbabilidades(ideal);
-  const votosParaHistorico = dados.votos_recentes || [];
-
-  const handlePecClick = (pecIdentificacao: string) => {
-    const voto = votosParaHistorico.find((v) => v.pec === pecIdentificacao);
-    setPecSelecionada({
-      pec: findPecByLabel(pecsCache, pecIdentificacao),
-      raw: pecIdentificacao,
-      voto: voto?.voto,
-      data: voto?.data,
-    });
-  };
-
-  const navegarParaPec = (busca: string) => {
-    setPecSelecionada(null);
-    navigate(`/pecs?busca=${encodeURIComponent(busca)}`);
-  };
 
   const hasCharts =
-    isMounted && categorias?.length > 0 && ideologiaData?.length > 0;
+    isMounted && categorias && categorias.length > 0 && ideologiaData && ideologiaData.length > 0;
 
   const { score, classificacao, base_partido, alinhamento } = ideologia.ideologia;
   const { total_votos, sim, nao, abstencao } = ideologia.estatisticas;
@@ -469,8 +554,7 @@ export function Dashboard() {
           ← Voltar para Políticos
         </button>
 
-        {/* BANNER DE COBERTURA — alerta neutro, foca em limitação dos dados.
-            Renderiza mesmo se 'confianca' não vier do back (compat. retroativa). */}
+        {/* BANNER DE COBERTURA */}
         <CoberturaBanner
           totalVotos={total_votos}
           votosRelevantes={ideologia.confianca?.votos_relevantes ?? 0}
@@ -481,7 +565,7 @@ export function Dashboard() {
           }
         />
 
-        {/* HERO: identificação do deputado */}
+        {/* HERO */}
         <section className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 md:p-8 transition-colors">
           <div className="flex flex-col sm:flex-row gap-6">
             {dados.fotoUrl ? (
@@ -526,7 +610,7 @@ export function Dashboard() {
           </div>
         </section>
 
-        {/* MATCH com perfil do usuário (vem do quiz /fit) */}
+        {/* MATCH */}
         {match && (
           <MatchCard
             resultado={match}
@@ -581,17 +665,99 @@ export function Dashboard() {
           </div>
         </section>
 
-        {/* GRÁFICOS LADO A LADO */}
+        {/* VOTOS POR CATEGORIA - AGORA EXPANSÍVEL E PRINCIPAL */}
+        {votosPorCategoria && votosPorCategoria.length > 0 && (
+          <section className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 transition-colors">
+            <header className="mb-6 pb-4 border-b border-gray-100 dark:border-white/10">
+              <h2 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                Distribuição de Votos por Categoria
+              </h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">
+                Como o deputado se posicionou em cada área temática
+              </p>
+            </header>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {(showAllCategorias
+                ? votosPorCategoria
+                : votosPorCategoria.slice(0, 3)
+              ).map((cat) => (
+                <button
+                  key={cat.nome}
+                  onClick={() => {
+                    setFiltroCategoria(cat.nome);
+                    scrollParaHistorico();
+                  }}
+                  className={`bg-gray-50 dark:bg-[#001b3d]/50 border rounded-2xl p-5 flex flex-col items-center transition-all group text-left w-full ${
+                    filtroCategoria === cat.nome
+                      ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md'
+                      : 'border-gray-100 dark:border-white/5 hover:border-blue-400/30'
+                  }`}
+                >
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4 text-center h-8 flex items-center line-clamp-2 leading-tight">
+                    {cat.nome}
+                  </span>
+
+                  <div className="w-full relative pointer-events-none">
+                    <PieVotos
+                      data={cat.votos}
+                      height={150}
+                      innerRadius={45}
+                      outerRadius={65}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 w-full mt-4 border-t border-gray-100 dark:border-white/5 pt-4">
+                    <div className="flex flex-col items-center border-r border-gray-100 dark:border-white/5">
+                      <span className="text-[9px] font-black text-green-600 dark:text-green-400 uppercase tracking-tighter">
+                        Sim
+                      </span>
+                      <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">
+                        {cat.votos[0]?.value || 0}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <span className="text-[9px] font-black text-red-600 dark:text-red-400 uppercase tracking-tighter">
+                        Não
+                      </span>
+                      <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">
+                        {cat.votos[1]?.value || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-[9px] font-bold text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    Ver PECs desta pauta →
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {votosPorCategoria.length > 3 && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => setShowAllCategorias(!showAllCategorias)}
+                  className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+                >
+                  {showAllCategorias
+                    ? '↑ Mostrar Menos'
+                    : `↓ Ver mais ${votosPorCategoria.length - 3} categorias`}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* NOTAS POR CATEGORIA (BARRAS) */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PainelChart
             titulo="Perfil por categoria"
             legenda="Fidelidade partidária em cada área temática (0–10)"
           >
-            {hasCharts && categorias.length >= 3 ? (
+            {hasCharts && categorias && categorias.length >= 3 ? (
               <div className="w-full h-[320px]">
                 <RadarCategorias data={categorias} />
               </div>
-            ) : hasCharts && categorias.length > 0 ? (
+            ) : hasCharts && categorias && categorias.length > 0 ? (
               <CategoriasFallback data={categorias} />
             ) : (
               <p className="text-sm text-gray-400 italic">
@@ -604,7 +770,7 @@ export function Dashboard() {
             titulo="Distribuição ideológica"
             legenda="Probabilidade do deputado em cada espectro político"
           >
-            {hasCharts && ideologiaData.length > 0 ? (
+            {hasCharts && ideologiaData && ideologiaData.length > 0 ? (
               <div className="w-full h-[320px]">
                 <IdeologiaDistribuicao data={ideologiaData} />
               </div>
@@ -616,15 +782,14 @@ export function Dashboard() {
           </PainelChart>
         </section>
 
-        {/* PROPORÇÃO DE VOTOS + BARRAS */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section>
           <PainelChart
-            titulo="Proporção Sim x Não"
-            legenda="Considerando todas as votações"
+            titulo="Notas por categoria"
+            legenda="Quanto maior, mais fiel à linha do partido naquela área"
           >
-            {votos.length > 0 ? (
-              <div className="w-full">
-                <PieVotos data={votos} />
+            {hasCharts && categorias && categorias.length > 0 ? (
+              <div className="w-full h-[340px]">
+                <BarCategorias data={categorias} />
               </div>
             ) : (
               <p className="text-sm text-gray-400 italic">
@@ -632,49 +797,65 @@ export function Dashboard() {
               </p>
             )}
           </PainelChart>
-
-          <div className="lg:col-span-2">
-            <PainelChart
-              titulo="Notas por categoria"
-              legenda="Quanto maior, mais fiel à linha do partido naquela área"
-            >
-              {hasCharts && categorias.length > 0 ? (
-                <div className="w-full h-[340px]">
-                  <BarCategorias data={categorias} />
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400 italic">
-                  Sem dados suficientes
-                </p>
-              )}
-            </PainelChart>
-          </div>
         </section>
 
         {/* HISTÓRICO */}
-        <section className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 transition-colors">
-          <header className="mb-4 pb-4 border-b border-gray-100 dark:border-white/10 flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+        <section
+          id="secao-historico"
+          className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 transition-colors scroll-mt-6"
+        >
+          <header className="mb-4 pb-4 border-b border-gray-100 dark:border-white/10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
-                Histórico de votações
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                  Histórico de votações
+                </h2>
+                {filtroCategoria && (
+                  <span className="px-2 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase rounded-md flex items-center gap-2">
+                    {filtroCategoria}
+                    <button
+                      onClick={() => setFiltroCategoria(null)}
+                      className="hover:text-blue-800 dark:hover:text-white transition-colors"
+                      title="Limpar filtro"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">
-                Clique em uma PEC para ver detalhes e o placar completo
+                {filtroCategoria
+                  ? `Mostrando apenas votos em "${filtroCategoria}"`
+                  : 'Clique em uma PEC para ver detalhes e o placar completo'}
               </p>
             </div>
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-              {votosParaHistorico.length} registros
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-full border border-gray-100 dark:border-white/5">
+              {votosFiltrados.length} registros{' '}
+              {filtroCategoria && `de ${votosParaHistorico.length}`}
             </span>
           </header>
-          {votosParaHistorico.length > 0 ? (
+
+          {votosFiltrados.length > 0 ? (
             <HistoricoVotacoes
-              votos={votosParaHistorico}
+              votos={votosFiltrados}
               onPecClick={handlePecClick}
+              getCategoriaMock={getCategoriaMock}
             />
           ) : (
-            <p className="text-center text-sm text-gray-400 dark:text-gray-500 italic py-12">
-              Nenhum voto recente registrado para este deputado.
-            </p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <span className="text-4xl mb-4">🔍</span>
+              <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+                Nenhum voto encontrado para esta categoria.
+              </p>
+              {filtroCategoria && (
+                <button
+                  onClick={() => setFiltroCategoria(null)}
+                  className="mt-4 text-xs font-black uppercase tracking-widest text-blue-500 hover:underline"
+                >
+                  Ver todos os votos
+                </button>
+              )}
+            </div>
           )}
         </section>
       </main>
