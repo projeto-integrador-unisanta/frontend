@@ -31,6 +31,33 @@ const TAGS_ESQUERDA: ExemploTag[] = [
   { tag: 'pauta-de-costumes', peso: -0.8, rotulo: 'Pauta de Costumes' },
 ];
 
+// Pesos do eixo Y (libertário ↔ autoritário). Mesma convenção:
+//   peso > 0 → puxa o ponto pra cima (autoritário)
+//   peso < 0 → puxa o ponto pra baixo (libertário)
+const TAGS_AUTORITARIO: ExemploTag[] = [
+  { tag: 'pauta-bolsonarista', peso: +1.8, rotulo: 'Pauta Bolsonarista' },
+  { tag: 'lei-e-ordem', peso: +1.8, rotulo: 'Lei e Ordem' },
+  { tag: 'pro-vida', peso: +1.5, rotulo: 'Pró-vida' },
+  { tag: 'vigilancia-estado', peso: +1.5, rotulo: 'Vigilância Estatal' },
+  { tag: 'conservadorismo', peso: +1.0, rotulo: 'Conservadorismo' },
+  { tag: 'freio-institucional', peso: +1.0, rotulo: 'Freio Institucional' },
+  { tag: 'estado-forte', peso: +1.0, rotulo: 'Estado Forte' },
+  { tag: 'controle-institucional', peso: +0.8, rotulo: 'Controle Institucional' },
+  { tag: 'corporativismo', peso: +0.5, rotulo: 'Corporativismo' },
+  { tag: 'intervencionismo', peso: +0.5, rotulo: 'Intervencionismo' },
+];
+
+const TAGS_LIBERTARIO: ExemploTag[] = [
+  { tag: 'liberdade-civil', peso: -1.8, rotulo: 'Liberdade Civil' },
+  { tag: 'estado-minimo', peso: -1.5, rotulo: 'Estado Mínimo' },
+  { tag: 'progressismo', peso: -1.0, rotulo: 'Progressismo' },
+  { tag: 'anti-establishment', peso: -1.0, rotulo: 'Antissistema' },
+  { tag: 'pauta-de-costumes', peso: -0.8, rotulo: 'Pauta de Costumes' },
+  { tag: 'liberalismo-economico', peso: -0.5, rotulo: 'Liberalismo Econômico' },
+  { tag: 'direitos-sociais', peso: -0.5, rotulo: 'Direitos Sociais' },
+  { tag: 'politica-identitaria', peso: -0.5, rotulo: 'Política Identitária' },
+];
+
 function Secao({
   numero,
   titulo,
@@ -151,6 +178,22 @@ export function MetodologiaPage() {
             de quantos votos relevantes existem — explicamos isso na
             Seção 4.
           </p>
+          <div className="my-6 p-6 bg-blue-50 dark:bg-blue-400/5 border-l-4 border-blue-400 rounded-r-xl">
+            <p className="font-bold text-gray-900 dark:text-white mb-2">
+              🧭 E o segundo eixo?
+            </p>
+            <p className="text-sm">
+              Em paralelo a este score 0–10, calculamos um segundo
+              eixo (Libertário ↔ Autoritário) seguindo exatamente a
+              mesma lógica, com pesos próprios por tag. O resultado
+              vira o mapa político 2D em{' '}
+              <a href="/espectro" className="text-blue-600 dark:text-brandAccent underline">
+                /espectro
+              </a>
+              . Veja a Seção 10 pra entender como o eixo Y é
+              calculado.
+            </p>
+          </div>
         </Secao>
 
         <Secao numero="02" titulo="Pesos das tags ideológicas">
@@ -364,10 +407,15 @@ export function MetodologiaPage() {
               futuro.
             </li>
             <li>
-              <strong>Eixo único.</strong> Reduzir um deputado a um
-              número de 0 a 10 é uma simplificação grande. Por isso
-              também mostramos as notas por categoria e o
-              alinhamento — três visões em vez de uma só.
+              <strong>Eixo Y é mais ralo que o eixo X.</strong> As
+              tags do banco foram inicialmente desenhadas pro eixo
+              econômico. O eixo libertário/autoritário só tem boa
+              resolução quando as PECs são etiquetadas com tags
+              Y-puras (<code>lei-e-ordem</code>,{' '}
+              <code>vigilancia-estado</code>,{' '}
+              <code>liberdade-civil</code>). Em deputados que só
+              votaram pautas econômicas, o Y vai puxar bastante pro
+              partido.
             </li>
             <li>
               <strong>Cobertura das PECs.</strong> Só conseguimos
@@ -384,21 +432,215 @@ export function MetodologiaPage() {
           </p>
           <ul className="list-disc list-inside space-y-2 ml-4 font-mono text-sm">
             <li>
-              <code>src/lib/score.ts</code> — pesos das tags e cálculo do
-              score por votos
+              <code>src/lib/score.ts</code> — pesos das tags (1D e 2D)
+              e cálculo do score por votos
             </li>
             <li>
-              <code>src/lib/ideologia.ts</code> — Bayesian shrinkage,
-              alinhamento, probabilidades
+              <code>src/lib/ideologia.ts</code> — Bayesian shrinkage
+              (1D e 2D), alinhamento, probabilidades
             </li>
             <li>
-              <code>src/lib/partidos.ts</code> — tabela de bases
-              ideológicas dos partidos
+              <code>src/lib/partidos.ts</code> — tabelas de bases
+              ideológicas dos partidos (1D e 2D)
             </li>
           </ul>
           <p className="mt-4">
             Tudo TypeScript puro. Sem ML, sem caixa-preta. É só ler.
           </p>
+        </Secao>
+
+        <Secao numero="10" titulo="Espectro 2D — o segundo eixo">
+          <p>
+            Tudo que foi descrito até aqui descreve UM eixo: Esquerda ↔
+            Direita (econômico/cultural). O mapa de espectro político
+            em{' '}
+            <a href="/espectro" className="text-blue-600 dark:text-brandAccent underline">
+              /espectro
+            </a>{' '}
+            usa <strong>dois eixos</strong>, igual ao Political Compass
+            clássico:
+          </p>
+          <div className="grid grid-cols-2 gap-3 my-6 text-center">
+            <div className="p-4 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+              <div className="text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1">
+                Eixo X
+              </div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                Esquerda ↔ Direita
+              </div>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                econômico / cultural
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+              <div className="text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-1">
+                Eixo Y
+              </div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                Libertário ↔ Autoritário
+              </div>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                liberdade individual vs. controle institucional
+              </div>
+            </div>
+          </div>
+
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-8 mb-3">
+            Peso dual por tag
+          </h3>
+          <p>
+            Cada tag agora carrega <strong>dois pesos</strong>: um pra
+            X, outro pra Y. Uma tag pode pesar muito num eixo e ser
+            neutra no outro. Exemplos:
+          </p>
+          <Formula>
+            "estado-forte" → x: −2.0, y: +1.0
+          </Formula>
+          <p className="text-sm">
+            "Estado forte" é claramente esquerda no eixo econômico
+            (peso x negativo, alto) e levemente autoritário no eixo Y
+            (estado regulando mais a vida = puxa pra cima).
+          </p>
+          <Formula>
+            "direitos-trabalhistas" → x: −1.0, y: 0.0
+          </Formula>
+          <p className="text-sm">
+            Pauta puramente econômica: identifica esquerda, mas é
+            neutra no eixo libertário/autoritário.
+          </p>
+          <Formula>
+            "liberdade-civil" → x: 0.0, y: −1.8
+          </Formula>
+          <p className="text-sm">
+            Tag <strong>Y-pura</strong>: não diz se a proposta é de
+            esquerda ou direita, mas identifica claramente o eixo
+            libertário.
+          </p>
+
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-10 mb-3">
+            Pesos no eixo Y
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-blue-700 dark:text-blue-300 mb-3">
+                ▲ Autoritário (y &gt; 0)
+              </h4>
+              <div className="space-y-2">
+                {TAGS_AUTORITARIO.map((t) => (
+                  <TagPeso key={t.tag} {...t} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-green-700 dark:text-green-300 mb-3">
+                ▼ Libertário (y &lt; 0)
+              </h4>
+              <div className="space-y-2">
+                {TAGS_LIBERTARIO.map((t) => (
+                  <TagPeso key={t.tag} {...t} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-10 mb-3">
+            Tags Y-puras (novas)
+          </h3>
+          <p>
+            Tags onde o peso X é zero (ou quase) e o sinal vive todo
+            no eixo Y. Ainda não foram aplicadas a PECs do banco —
+            entram no manual de etiquetagem das próximas votações pra
+            ganhar resolução no eixo libertário/autoritário:
+          </p>
+          <ul className="list-disc list-inside space-y-2 my-4 ml-4 text-sm">
+            <li>
+              <code>lei-e-ordem</code> → endurecimento penal, redução
+              da maioridade penal, prisão em 2ª instância
+            </li>
+            <li>
+              <code>vigilancia-estado</code> → monitoramento de massa,
+              controle de dados, regulação de redes
+            </li>
+            <li>
+              <code>liberdade-civil</code> → habeas corpus,
+              descriminalização, autonomia individual
+            </li>
+          </ul>
+
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-10 mb-3">
+            Shrinkage independente por eixo
+          </h3>
+          <p>
+            A parte mais interessante: o Bayesian shrinkage da Seção 4
+            roda <strong>separadamente em cada eixo</strong>. Isso
+            porque uma tag pode contribuir pra X sem mexer em Y (e
+            vice-versa). O peso total acumulado em cada eixo é
+            independente:
+          </p>
+          <Formula>
+            score_x = base_x · K/(K+n_x) + voto_x · n_x/(K+n_x)
+          </Formula>
+          <Formula>
+            score_y = base_y · K/(K+n_y) + voto_y · n_y/(K+n_y)
+          </Formula>
+          <p>
+            Resultado: um deputado que votou muito em pautas
+            econômicas (n_x grande, n_y pequeno) terá{' '}
+            <strong>alta confiança no posicionamento X</strong> (vem
+            do comportamento real) e{' '}
+            <strong>baixa confiança em Y</strong> (puxa pro partido).
+            O tooltip do compass mostra essa confiança.
+          </p>
+
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-10 mb-3">
+            Base 2D dos partidos
+          </h3>
+          <p>
+            Cada partido tem agora um ponto âncora 2D em{' '}
+            <code>partidos.ts</code>. Alguns exemplos pra dar a
+            intuição:
+          </p>
+          <div className="grid grid-cols-2 gap-3 my-4 text-sm">
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-[#001b3d] border border-gray-200 dark:border-white/5">
+              <strong>PT</strong> → x: 2, y: 6{' '}
+              <span className="text-gray-500 dark:text-gray-400">
+                (esq autoritária leve)
+              </span>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-[#001b3d] border border-gray-200 dark:border-white/5">
+              <strong>PL</strong> → x: 9, y: 8{' '}
+              <span className="text-gray-500 dark:text-gray-400">
+                (direita autoritária)
+              </span>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-[#001b3d] border border-gray-200 dark:border-white/5">
+              <strong>NOVO</strong> → x: 10, y: 3{' '}
+              <span className="text-gray-500 dark:text-gray-400">
+                (libertário-direita)
+              </span>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-[#001b3d] border border-gray-200 dark:border-white/5">
+              <strong>PSOL</strong> → x: 1, y: 6{' '}
+              <span className="text-gray-500 dark:text-gray-400">
+                (esq autoritária)
+              </span>
+            </div>
+          </div>
+
+          <div className="my-6 p-6 bg-yellow-50 dark:bg-yellow-400/5 border-l-4 border-yellow-400 rounded-r-xl">
+            <p className="font-bold text-gray-900 dark:text-white mb-2">
+              ⚠️ Honestidade intelectual
+            </p>
+            <p className="text-sm">
+              O eixo Y é mais recente que o X e tem menos dados de
+              votação encostando nele (poucas PECs foram etiquetadas
+              com tags Y-puras até agora). Pra a maioria dos
+              deputados, o Y vai estar bem perto da base do partido —
+              é o shrinkage funcionando: na ausência de evidência, o
+              chute mais honesto é o prior. Conforme mais PECs
+              receberem tags Y-puras, o eixo ganha resolução.
+            </p>
+          </div>
         </Secao>
 
         <footer className="mt-16 pt-8 border-t border-gray-200 dark:border-white/10 text-center">
