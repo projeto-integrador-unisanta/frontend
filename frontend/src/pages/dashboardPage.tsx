@@ -1,14 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  mapDeputadoToCharts,
-  mapIdeologiaProbabilidades,
-} from '../components/mapDeputadoToCharts';
+import { mapDeputadoToCharts } from '../components/mapDeputadoToCharts';
 import { ScoreCard } from '../components/scoreCard';
-import { RadarCategorias } from '../components/radarCategorias';
 import { PieVotos } from '../components/pieVotos';
-import { BarCategorias } from '../components/barChart';
-import { IdeologiaDistribuicao } from '../components/IdeologiaDistribuicao';
 import { HistoricoVotacoes } from '../components/historicoVotacoes';
 import { PecPreviewModal } from '../components/pecPreviewModal';
 import { Header } from '../components/Header';
@@ -175,50 +169,121 @@ function MatchCard({
   );
 }
 
-function CategoriasFallback({
-  data,
+function classificarAlinhamento(nota: number): {
+  rotulo: string;
+  cor: string;
+  corTexto: string;
+} {
+  if (nota >= 8.5)
+    return {
+      rotulo: 'Quase sempre alinhado',
+      cor: 'bg-green-500',
+      corTexto: 'text-green-600 dark:text-green-400',
+    };
+  if (nota >= 7)
+    return {
+      rotulo: 'Frequentemente alinhado',
+      cor: 'bg-green-500',
+      corTexto: 'text-green-600 dark:text-green-400',
+    };
+  if (nota >= 5)
+    return {
+      rotulo: 'Posição mista',
+      cor: 'bg-yellow-500',
+      corTexto: 'text-yellow-600 dark:text-yellow-400',
+    };
+  if (nota >= 3)
+    return {
+      rotulo: 'Frequentemente diverge',
+      cor: 'bg-orange-500',
+      corTexto: 'text-orange-600 dark:text-orange-400',
+    };
+  return {
+    rotulo: 'Quase sempre diverge',
+    cor: 'bg-red-500',
+    corTexto: 'text-red-600 dark:text-red-400',
+  };
+}
+
+function AlinhamentoPorArea({
+  categorias,
+  nomePartido,
 }: {
-  data: { subject: string; nota: number }[];
+  categorias: { subject: string; nota: number; status: string }[];
+  nomePartido: string;
 }) {
-  if (!data.length) {
+  if (!categorias || categorias.length === 0) {
     return (
-      <p className="text-sm text-gray-400 italic">Sem dados suficientes</p>
+      <section className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 transition-colors">
+        <p className="text-sm text-gray-400 italic text-center">
+          Sem dados suficientes para análise por área.
+        </p>
+      </section>
     );
   }
+
+  const ordenadas = [...categorias].sort((a, b) => b.nota - a.nota);
+
   return (
-    <div className="w-full space-y-4 px-2">
-      <p className="text-xs text-gray-500 dark:text-gray-400 italic mb-2">
-        Poucas categorias para gerar o radar — exibindo barras horizontais.
-      </p>
-      {data.map((c) => {
-        const pct = Math.max(0, Math.min(100, (c.nota / 10) * 100));
-        const cor =
-          c.nota >= 7
-            ? 'bg-green-500'
-            : c.nota >= 5
-              ? 'bg-yellow-500'
-              : 'bg-red-500';
-        return (
-          <div key={c.subject}>
-            <div className="flex justify-between items-baseline mb-1.5">
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                {c.subject}
-              </span>
-              <span className="text-lg font-black text-gray-900 dark:text-white tabular-nums">
-                {c.nota.toFixed(1)}
-                <span className="text-xs text-gray-400 ml-1">/10</span>
-              </span>
+    <section className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 md:p-8 transition-colors">
+      <header className="mb-6 pb-4 border-b border-gray-100 dark:border-white/10">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xl">🎯</span>
+          <h2 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
+            Alinhamento com o partido por área
+          </h2>
+        </div>
+        <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+          Mostra o quanto o deputado vota seguindo a linha do{' '}
+          {nomePartido ? (
+            <span className="font-black text-gray-700 dark:text-gray-200">
+              {nomePartido}
+            </span>
+          ) : (
+            'partido'
+          )}{' '}
+          em cada tema. Verde indica que vota junto com o partido na maioria das
+          vezes; vermelho indica que costuma divergir.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {ordenadas.map((c) => {
+          const { rotulo, cor, corTexto } = classificarAlinhamento(c.nota);
+          const pct = Math.max(0, Math.min(100, (c.nota / 10) * 100));
+          return (
+            <div
+              key={c.subject}
+              className="bg-gray-50 dark:bg-[#001b3d]/50 border border-gray-100 dark:border-white/5 rounded-xl p-4"
+            >
+              <div className="flex justify-between items-start mb-3 gap-3">
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-snug">
+                  {c.subject}
+                </span>
+                <span
+                  className={`text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${corTexto}`}
+                >
+                  {rotulo}
+                </span>
+              </div>
+              <div className="h-2.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${cor} transition-all duration-700`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
             </div>
-            <div className="h-2.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-              <div
-                className={`h-full ${cor} transition-all duration-700`}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+
+      <footer className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10">
+        <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed italic">
+          ℹ️ A análise compara cada voto do deputado com a posição majoritária do
+          partido em cada tema. Categorias sem votos registrados não aparecem.
+        </p>
+      </footer>
+    </section>
   );
 }
 
@@ -256,34 +321,6 @@ function StatCard({
             {sufixo}
           </span>
         )}
-      </div>
-    </div>
-  );
-}
-
-function PainelChart({
-  titulo,
-  legenda,
-  children,
-}: {
-  titulo: string;
-  legenda?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-white dark:bg-[#001529] border border-gray-200 dark:border-white/10 rounded-2xl p-6 transition-colors flex flex-col">
-      <header className="mb-4 pb-4 border-b border-gray-100 dark:border-white/10">
-        <h2 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-gray-200">
-          {titulo}
-        </h2>
-        {legenda && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">
-            {legenda}
-          </p>
-        )}
-      </header>
-      <div className="flex-1 flex items-center justify-center min-h-[260px]">
-        {children}
       </div>
     </div>
   );
@@ -531,11 +568,7 @@ export function Dashboard() {
     );
   }
 
-  const { categorias, votos } = mapDeputadoToCharts(ideologia);
-  const ideologiaData = mapIdeologiaProbabilidades(ideal);
-
-  const hasCharts =
-    isMounted && categorias && categorias.length > 0 && ideologiaData && ideologiaData.length > 0;
+  const { categorias } = mapDeputadoToCharts(ideologia);
 
   const { score, classificacao, base_partido, alinhamento } = ideologia.ideologia;
   const { total_votos, sim, nao, abstencao } = ideologia.estatisticas;
@@ -754,57 +787,13 @@ export function Dashboard() {
           </section>
         )}
 
-        {/* NOTAS POR CATEGORIA (BARRAS) */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PainelChart
-            titulo="Perfil por categoria"
-            legenda="Fidelidade partidária em cada área temática (0–10)"
-          >
-            {hasCharts && categorias && categorias.length >= 3 ? (
-              <div className="w-full h-[320px]">
-                <RadarCategorias data={categorias} />
-              </div>
-            ) : hasCharts && categorias && categorias.length > 0 ? (
-              <CategoriasFallback data={categorias} />
-            ) : (
-              <p className="text-sm text-gray-400 italic">
-                Sem dados suficientes
-              </p>
-            )}
-          </PainelChart>
-
-          <PainelChart
-            titulo="Distribuição ideológica"
-            legenda="Probabilidade do deputado em cada espectro político"
-          >
-            {hasCharts && ideologiaData && ideologiaData.length > 0 ? (
-              <div className="w-full h-[320px]">
-                <IdeologiaDistribuicao data={ideologiaData} />
-              </div>
-            ) : (
-              <p className="text-sm text-gray-400 italic">
-                Sem dados suficientes
-              </p>
-            )}
-          </PainelChart>
-        </section>
-
-        <section>
-          <PainelChart
-            titulo="Notas por categoria"
-            legenda="Quanto maior, mais fiel à linha do partido naquela área"
-          >
-            {hasCharts && categorias && categorias.length > 0 ? (
-              <div className="w-full h-[340px]">
-                <BarCategorias data={categorias} />
-              </div>
-            ) : (
-              <p className="text-sm text-gray-400 italic">
-                Sem dados suficientes
-              </p>
-            )}
-          </PainelChart>
-        </section>
+        {/* ALINHAMENTO POR ÁREA — substitui as antigas seções de perfil/distribuição/notas */}
+        {isMounted && (
+          <AlinhamentoPorArea
+            categorias={categorias}
+            nomePartido={dados.partido || ''}
+          />
+        )}
 
         {/* HISTÓRICO */}
         <section
