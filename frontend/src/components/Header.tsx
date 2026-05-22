@@ -19,30 +19,22 @@ export function Header() {
     <header className="sticky top-0 z-50 flex items-center justify-between px-8 py-4 border-b border-white/10 bg-[#002B5B]/90 dark:bg-[#001529]/90 backdrop-blur-md text-white transition-all duration-300">
       {/* LOGO COM EFEITO GLOW */}
       <div
-        className="flex items-center gap-3 cursor-pointer group"
+        className="flex items-center gap-4 cursor-pointer group"
         onClick={() => navigate('/')}
       >
-        <div className="w-10 h-10 bg-gradient-to-br from-white to-gray-200 dark:from-brandAccent dark:to-blue-600 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:rotate-12 group-hover:scale-110 shadow-lg shadow-blue-500/20">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            className="w-6 h-6 text-[#002B5B] dark:text-white"
-          >
-            <path
-              d="M4 22V10M20 22V10M2 10L12 2L22 10M12 22V15M9 22V15M15 22V15"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:rotate-12 group-hover:scale-110 shadow-lg shadow-blue-500/20">
+          <img
+            src="/logo-agora-sem-texto.png"
+            alt="Ágora ícone"
+            className="w-11 h-11 object-contain"
+          />
         </div>
         <div className="flex flex-col">
-          <span className="font-black text-lg tracking-tighter leading-none">
-            FISCALIZA
+          <span className="font-black text-xl tracking-wide leading-none">
+            Ágora
           </span>
-          <span className="text-[10px] font-bold tracking-[0.3em] text-blue-300 dark:text-brandAccent uppercase">
-            Brazil
+          <span className="text-[11px] font-bold tracking-[0.3em] text-blue-300 dark:text-brandAccent uppercase mt-0.5">
+            Brasil
           </span>
         </div>
       </div>

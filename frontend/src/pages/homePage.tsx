@@ -72,7 +72,7 @@ export function HomePage() {
       </main>
 
       <footer className="py-10 border-t border-white/10 text-center text-white/40 text-sm font-medium">
-        © 2026 FISCALIZA BRAZIL - Transparência Pública
+        © 2026 Ágora - Transparência Pública
       </footer>
     </div>
   );
